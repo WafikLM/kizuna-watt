@@ -141,6 +141,8 @@ Python 3 suffit, sans installation. La carte (OpenStreetMap / Leaflet) demande u
   - **Meteo et climat (modeles IA)** : previsions par gouvernorat et par echelle (jour, mois, annee), creation des modeles et de leurs cles, import CSV.
   - Format et envoi : `ml/API_PREVISIONS.md` (script `ml/push_forecasts.py`).
 
+> Les rues de `data/streets_tunisia.json` proviennent d'**OpenStreetMap** (© les contributeurs d'OpenStreetMap, licence ODbL) ; le fichier est genere par `tools/fetch_streets.py` et fourni dans le depot pour que l'eclairage public marche des le premier lancement.
+
 ## Eclairage public automatise
 Espace STEG > **Eclairage public** (`/lighting`) : carte des luminaires, etat en direct, consigne calculee (soleil, horaires, luminosite, presence,
 previsions d'IA), economie d'energie et gaspillage detectes a partir des **mesures reelles** des controleurs.

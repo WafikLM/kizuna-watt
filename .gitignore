@@ -1,4 +1,5 @@
-data/
+data/*
+!data/streets_tunisia.json
 ml/data_raw/
 *.joblib
 __pycache__/
@@ -15,7 +16,8 @@ ml/data_synth_eclairage/
 *.db
 *.db-wal
 *.db-shm
-data/
+data/*
+!data/streets_tunisia.json
 node_modules/
 .claude/
 .vscode/
