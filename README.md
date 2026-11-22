@@ -6,6 +6,9 @@
 
 > **Équipe :** [noms des membres à compléter]
 
+> 📄 **Business model / Modèle économique :** [1 page (EN)](docs/Business_Model_Kizuna_Watt_1page_EN.pdf) · [version détaillée (FR)](docs/Business_Model_Kizuna_Watt.pdf)
+> <!-- 🎬 **Vidéo de démonstration / Demo video (EN, < 2 min) :** [à ajouter : lien YouTube non répertorié ou Google Drive] -->
+
 ---
 
 ## 🇫🇷 Français
