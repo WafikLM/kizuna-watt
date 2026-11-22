@@ -42,6 +42,7 @@ INCIDENT_FILE = os.path.join(DATA, "demo_incident.json")
 ACCOUNTS_MD = os.path.join(DATA, "demo_comptes.md")
 HISTORY_DAYS = 35
 os.environ["KIZUNA_DB"] = DB
+os.environ["KIZUNA_NO_RATELIMIT"] = "1"      # la simulation cree beaucoup de comptes et de mesures d'un coup : pas de limites de debit
 sys.path.insert(0, ROOT)
 sys.stdout.reconfigure(encoding="utf-8")
 

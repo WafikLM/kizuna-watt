@@ -71,6 +71,8 @@ RULES = {            # nom -> (essais max, fenetre en secondes)
 
 def allow(rule, key):
     """True si l'appel est permis ; l'enregistre. Nettoie les anciennes entrees au passage."""
+    if _env("KIZUNA_NO_RATELIMIT") == "1":          # simulation et tests seulement (tools/demo.py) : ne l'utilisez jamais sur un serveur reel
+        return True
     mx, win = RULES[rule]
     now = time.time()
     k = (rule, key)
