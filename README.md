@@ -1,4 +1,124 @@
-# Kizuna Watt
+# Kizuna Watt 絆⚡
+
+**Kizuna 2026 · Hackathon Tunisie × Japon · Thème : l'énergie** — *kizuna* (絆) signifie « lien ».
+
+🇫🇷 [Français](#-français) · 🇬🇧 [English](#-english) · 📚 [Documentation technique](#documentation-technique)
+
+> **Équipe :** [noms des membres à compléter]
+
+---
+
+## 🇫🇷 Français
+
+### L'idée en une phrase
+Relier chaque foyer tunisien au réseau : un petit capteur mesure la vraie consommation, l'application aide le citoyen à maîtriser sa facture, et la STEG voit ses clients sur une carte pour réduire les pointes sans construire de nouvelle centrale.
+
+### Le problème
+- **Pointes d'été** : une partie du réseau ne sert que quelques heures par an, mais coûte le plus cher.
+- **Facture bimestrielle à tranches progressives** : le citoyen la découvre après coup, sans savoir quel appareil en est la cause.
+- **Éclairage public** sur horaire fixe, sans lien avec la présence réelle.
+- Aucun moyen simple, pour la STEG, de **parler au citoyen** et de l'**inciter** à effacer sa consommation.
+
+### Ce que fait Kizuna Watt
+| Pour le citoyen | Pour la STEG |
+|---|---|
+| Consommation **mesurée** en direct (capteur), jamais inventée | Carte de tous les foyers connectés, états et alertes |
+| **Facture prévue** de la période (tarif progressif) + montant en direct + historique des factures payées | **Pointes** annoncées, consignes par palier selon les équipements du foyer |
+| Alerte de **consommation anormale** (modèle d'IA + habitudes + puissance déclarée) | **Redémarrages échelonnés** pour éviter l'effet rebond |
+| **Code de récompense** (signé, à usage unique) si la réduction est réellement mesurée | Éclairage public piloté (soleil, présence prévue par l'IA) |
+| **Mimamori 見守り** : veille bienveillante d'un proche âgé (rythme d'activité électrique, sans caméra), alerte par e-mail | Prévisions météo / demande par gouvernorat |
+| Interface en **français, anglais, arabe (droite→gauche) et japonais** | |
+
+### Captures d'écran *(données de simulation, étiquetées « simulation » dans l'application)*
+| | |
+|---|---|
+| ![Tableau de bord client](docs/screenshots/01-tableau-de-bord-client.jpg) | ![Plan de pointe et récompense](docs/screenshots/02-plan-de-pointe-recompense.jpg) |
+| *Client : consommation en direct, facture prévue, tranches* | *Client : pointe annoncée, consignes et code de récompense* |
+| ![Veille mimamori](docs/screenshots/03-mimamori-veille.jpg) | ![Carte STEG](docs/screenshots/04-carte-steg.jpg) |
+| *Mimamori : veille d'un proche* | *STEG : carte des foyers connectés* |
+
+### Essayer en 3 commandes
+Prérequis : [Python 3.11+](https://www.python.org/downloads/) et [Git](https://git-scm.com). Internet est utile pour la carte (OpenStreetMap).
+```bash
+git clone https://github.com/WafikLM/kizuna-watt.git
+cd kizuna-watt
+python tools/demo.py run
+```
+Puis ouvrir **http://127.0.0.1:8030/login** (laisser la fenêtre de commande ouverte : elle envoie les mesures simulées en direct).
+
+| Rôle | Compte | Mot de passe |
+|---|---|---|
+| Client (famille) | `sim02@kizuna-sim.local` | `SimKizuna-2026` |
+| Client avec veille mimamori | `sim14@kizuna-sim.local` | `SimKizuna-2026` |
+| Gestionnaire STEG (carte) | `steg@kizuna-sim.local` | `SimKizuna-2026` |
+
+La liste complète des comptes est écrite dans `data/demo/demo_comptes.md` après le lancement. Ces comptes sont **fictifs** : ne réutilisez ce mot de passe nulle part.
+
+Facultatif : `pip install -r requirements.txt` active les modèles d'IA (détection d'anomalie, prévisions) ; le serveur lui-même n'utilise que la bibliothèque standard de Python.
+
+### Honnêteté : ce qui est réel, simulé et à valider
+- ✅ **Réel :** le logiciel de bout en bout (comptes, capteur via API, carte, pointes, récompenses, facture, mimamori, éclairage, 4 langues), la sécurité (mots de passe hachés scrypt, en-têtes de sécurité, limites de débit), l'envoi d'e-mails d'alerte (testé avec Brevo).
+- 🧪 **Simulé :** les 15 foyers et leurs mesures de la démo (générés à partir des équipements déclarés, **étiquetés « simulation »**) ; ils servent à tester le logiciel, pas à mesurer la précision des modèles. Les SMS sont simulés (aucun fournisseur SMS branché).
+- ⚠️ **Hypothèses à valider avec la STEG :** tarifs, tranches, seuils de pointe et d'alerte, pourcentage de réduction pour la récompense.
+- 🚧 **Pas encore fait :** pilote sur de vrais foyers, double authentification, vérification de l'e-mail, passage à l'échelle (un seul processus + SQLite).
+
+### Notre vision pour le Japon
+Le même socle sert la société vieillissante : la veille *mimamori* repose sur le rythme électrique du foyer, sans caméra ni micro, avec le consentement de la personne.
+
+---
+
+## 🇬🇧 English
+
+### The idea in one sentence
+Connect every Tunisian household to the grid: a small sensor measures real consumption, the app helps citizens control their bill, and the utility (STEG) sees its customers on a map to flatten demand peaks without building a new power plant.
+
+### The problem
+- **Summer peaks**: part of the grid is used only a few hours a year, yet it is the most expensive part.
+- **Bi-monthly bill with progressive tiers**: citizens discover it after the fact, without knowing which appliance caused it.
+- **Street lighting** on a fixed schedule, unrelated to real presence.
+- No simple way for the utility to **talk to citizens** and **reward** them for reducing consumption.
+
+### What Kizuna Watt does
+| For the citizen | For the utility (STEG) |
+|---|---|
+| **Measured** live consumption (sensor), never invented | Map of all connected homes, states and alerts |
+| **Forecast bill** for the period (progressive tariff) + live amount + paid-bill history | **Peaks** announced, level-based instructions adapted to each home's appliances |
+| **Abnormal consumption** alerts (AI model + habits + declared power) | **Staggered restarts** to avoid a rebound peak |
+| **Reward code** (signed, single use) when the reduction is really measured | Street lighting control (sunset, AI-predicted presence) |
+| **Mimamori 見守り**: gentle watch over an elderly relative (electrical activity rhythm, no camera), e-mail alert | Weather / demand forecasts per governorate |
+| UI in **French, English, Arabic (right-to-left) and Japanese** | |
+
+### Screenshots *(simulated data, labelled "simulation" in the app)*
+See the table above (the screenshots are in French).
+
+### Try it in 3 commands
+Requirements: [Python 3.11+](https://www.python.org/downloads/) and [Git](https://git-scm.com). Internet access helps for the map (OpenStreetMap).
+```bash
+git clone https://github.com/WafikLM/kizuna-watt.git
+cd kizuna-watt
+python tools/demo.py run
+```
+Then open **http://127.0.0.1:8030/login** (keep the command window open: it streams the simulated measurements live). Use the accounts in the table above (password `SimKizuna-2026`, fictitious accounts). The language selector is at the top right of every page.
+
+Optional: `pip install -r requirements.txt` enables the AI models (anomaly detection, forecasts); the server itself only uses Python's standard library.
+
+### Honesty: what is real, simulated, and still to validate
+- ✅ **Real:** the end-to-end software (accounts, sensor API, map, peaks, rewards, bill forecast, mimamori, lighting, 4 languages), security (scrypt-hashed passwords, security headers, rate limits), alert e-mails (tested with Brevo).
+- 🧪 **Simulated:** the 15 demo homes and their measurements (generated from declared appliances, **labelled "simulation"**); they test the software, not the accuracy of the models. SMS are simulated (no SMS provider connected).
+- ⚠️ **Assumptions to validate with STEG:** tariffs, tiers, peak and alert thresholds, reduction percentage for the reward.
+- 🚧 **Not done yet:** pilot with real homes, two-factor authentication, e-mail verification, scaling beyond one process + SQLite.
+
+### Our vision for Japan
+The same foundation serves an ageing society: *mimamori* relies on the household's electrical rhythm, with no camera or microphone, and with the person's consent.
+
+---
+
+## Licence / License
+[MIT](LICENSE).
+
+---
+
+## Documentation technique
 
 Application web : les **clients** s'inscrivent avec leur adresse, declarent leurs equipements et relient leur capteur ;
 le **compte STEG** voit tous les clients sur une carte. **Aucune donnee fictive** : sans capteur, aucune consommation n'est affichee.
