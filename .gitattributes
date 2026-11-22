@@ -1,0 +1,5 @@
+# Fins de ligne identiques pour toute l'equipe (Windows / Mac / Linux)
+* text=auto
+*.png binary
+*.pkl binary
+*.joblib binary

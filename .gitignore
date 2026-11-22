@@ -1,0 +1,24 @@
+data/
+ml/data_raw/
+*.joblib
+__pycache__/
+archive/
+emulator/node_modules/
+ml/data_synth_eclairage/
+# data/ est deja ignore (rues OpenStreetMap telechargees)
+
+# --- secrets et donnees locales : ne jamais mettre sur Git ---
+.env
+.env.*
+*.pem
+*.key
+*.db
+*.db-wal
+*.db-shm
+data/
+node_modules/
+.claude/
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

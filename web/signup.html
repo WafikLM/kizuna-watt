@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Creer un compte — Kizuna Watt</title>
+<script>try{var t=localStorage.getItem("kw-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<script>try{var l=localStorage.getItem("kw-lang")||"fr";if(/^(en|ar|ja)$/.test(l)){document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";document.write('<script src="/static/i18n/'+l+'.js"><\/script>')}}catch(e){}</script>
+<link rel="icon" href="/static/logo-icon.png" type="image/png">
+<meta name="theme-color" content="#f3f6fb">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+<div class="container"><div class="topnav"><a class="brand" href="/"><img class="logo logo-l" src="/static/logo-icon.png" alt="Kizuna Watt"><img class="logo logo-d" src="/static/logo-icon-dark.png" alt=""><span class="bn">Kizuna <b>Watt</b><small>طاقة · 絆 · STEG</small></span></a><span class="grow"></span><a class="btn sm" href="/login">Se connecter</a></div></div>
+<div class="authwrap" style="min-height:calc(100vh - 80px);align-items:start">
+  <form class="glass glow authcard" id="f" style="max-width:720px" novalidate>
+    <h1 style="font-size:26px">Creer un compte</h1>
+    <div class="steps"><i class="on" id="s1"></i><i id="s2"></i><i id="s3"></i></div>
+
+    <section id="p1">
+      <h2>1. Votre compte</h2>
+      <label class="f" for="full_name">Nom complet</label><input id="full_name" required type="text" autocomplete="name"><div class="err" data-e="full_name"></div>
+      <label class="f" for="email">Adresse e-mail</label><input id="email" required type="email" autocomplete="email"><div class="err" data-e="email"></div>
+      <div class="row">
+        <div><label class="f" for="password">Mot de passe <small>(8 car. min., lettre + chiffre)</small></label><input id="password" required type="password" autocomplete="new-password"><div class="err" data-e="password"></div></div>
+        <div><label class="f" for="password2">Confirmer</label><input id="password2" required type="password" autocomplete="new-password"><div class="err" data-e="password2"></div></div>
+      </div>
+      <label class="f" for="phone">Telephone <small>(8 chiffres)</small></label><input id="phone" required type="tel" placeholder="22 123 456" autocomplete="tel"><div class="err" data-e="phone"></div>
+    </section>
+
+    <section id="p2" class="hide">
+      <h2>2. Votre domicile et votre facture</h2>
+      <div class="row">
+        <div><label class="f" for="governorate">Gouvernorat</label><select id="governorate"></select><div class="err" data-e="governorate"></div></div>
+        <div><label class="f" for="delegation">Delegation <small>(facultatif)</small></label><input id="delegation" required type="text"></div>
+      </div>
+      <label class="f" for="address">Adresse</label><input id="address" required type="text" autocomplete="street-address"><div class="err" data-e="address"></div>
+      <div class="row">
+        <div><label class="f" for="postal_code">Code postal</label><input id="postal_code" required type="text" inputmode="numeric" maxlength="4"><div class="err" data-e="postal_code"></div></div>
+        <div><label class="f" for="housing_type">Type de logement</label><select id="housing_type"></select><div class="err" data-e="housing_type"></div></div>
+      </div>
+      <label class="f" for="occupants">Nombre d'occupants</label><input id="occupants" required type="number" min="1" max="30"><div class="err" data-e="occupants"></div>
+
+      <label class="f">Position de votre domicile sur la carte <small>(cliquez, ou faites glisser le repere)</small></label>
+      <div id="pin" class="map"></div>
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;align-items:center">
+        <button type="button" class="btn sm" id="geo">📍 Utiliser ma position</button>
+        <input id="lat" required type="number" step="any" placeholder="Latitude" style="width:150px"><input id="lng" required type="number" step="any" placeholder="Longitude" style="width:150px">
+      </div>
+      <div class="err" data-e="location"></div>
+
+      <h3 style="margin-top:22px">Votre facture STEG</h3>
+      <p class="sub">Format libre : nous ne verifions pas ces informations aupres de la STEG.</p>
+      <div class="row">
+        <div><label class="f" for="steg_ref">Reference de facture / contrat</label><input id="steg_ref" required type="text"><div class="err" data-e="steg_ref"></div></div>
+        <div><label class="f" for="meter_number">Numero de compteur <small>(facultatif)</small></label><input id="meter_number" type="text"><div class="err" data-e="meter_number"></div></div>
+      </div>
+      <label class="f" for="breaker_kw">Puissance souscrite (kW) <small>(voir votre facture)</small></label><input id="breaker_kw" required type="number" min="1" max="60" step="0.1"><div class="err" data-e="breaker_kw"></div>
+    </section>
+
+    <section id="p3" class="hide">
+      <h2>3. Les equipements de votre maison</h2>
+      <p class="sub">Facultatif : vous pourrez les ajouter ou les modifier plus tard.</p>
+      <div id="eq"></div><div class="err" data-e="equipment"></div>
+      <div class="check" style="margin-top:18px"><input type="checkbox" id="consent_terms"><label for="consent_terms">J'accepte que le gestionnaire du reseau (compte STEG) voie mon nom, mon adresse, mes equipements et la consommation mesuree par mon capteur. Je comprends que la reference de facture n'est pas verifiee.</label></div>
+      <div class="err" data-e="consent_terms"></div>
+    </section>
+
+    <div class="err" id="gen" role="alert" style="margin-top:10px"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:22px">
+      <button type="button" class="btn" id="back" disabled>Retour</button>
+      <button type="button" class="btn primary" id="next" data-validate="fn:vsel">Continuer</button>
+    </div>
+    <p class="sub" style="text-align:center;margin-top:14px">Deja un compte ? <a href="/login">Se connecter</a></p>
+  </form>
+</div>
+<script src="/static/common.js"></script>
+<script src="/static/i18n.js"></script>
+<script>
+let step = 1, pin = null, loc = { lat: null, lng: null }, eq = null, mapInit = false;
+const FIELDS = { 1: ["full_name", "email", "password", "password2", "phone"], 2: ["governorate", "address", "postal_code", "housing_type", "occupants", "location", "steg_ref", "meter_number", "breaker_kw"], 3: ["equipment", "consent_terms"] };
+const IDS = ["full_name", "email", "password", "password2", "phone", "governorate", "delegation", "address", "postal_code", "housing_type", "occupants", "steg_ref", "meter_number", "breaker_kw"];
+
+(async () => {
+  const o = (await api("/api/options")).data;
+  $("governorate").innerHTML = '<option value="">Choisir…</option>' + o.governorates.map((g) => `<option>${esc(g)}</option>`).join("");
+  $("housing_type").innerHTML = '<option value="">Choisir…</option>' + o.housing.map((g) => `<option>${esc(g)}</option>`).join("");
+  eq = equipmentEditor("eq", []);
+})();
+
+function setLoc(a, b) { loc = { lat: a, lng: b }; $("lat").value = a; $("lng").value = b; }
+["lat", "lng"].forEach((k) => ($(k).oninput = () => { const a = parseFloat($("lat").value), b = parseFloat($("lng").value); if (!isNaN(a) && !isNaN(b)) { loc = { lat: a, lng: b }; if (pin) pin.set(a, b); } }));
+$("geo").onclick = () => {
+  if (!navigator.geolocation) return toast("Position indisponible", "Votre navigateur ne gere pas la geolocalisation.", "warn");
+  navigator.geolocation.getCurrentPosition((p) => { setLoc(+p.coords.latitude.toFixed(6), +p.coords.longitude.toFixed(6)); if (pin) pin.set(loc.lat, loc.lng); }, () => toast("Position refusee", "Placez le repere a la main sur la carte.", "warn"));
+};
+
+function collect() {
+  const d = {}; IDS.forEach((k) => (d[k] = $(k).value));
+  d.lang = window.KW_LANG || "fr"; d.lat = loc.lat; d.lng = loc.lng; d.equipment = eq.get(); d.consent_terms = $("consent_terms").checked;
+  return d;
+}
+function showErrors(errors) {
+  document.querySelectorAll("[data-e]").forEach((e) => (e.textContent = ""));
+  document.querySelectorAll(".bad").forEach((e) => e.classList.remove("bad"));
+  Object.entries(errors).forEach(([k, msg]) => { const el = document.querySelector(`[data-e="${k}"]`); if (el) el.textContent = msg; const inp = $(k); if (inp) inp.classList.add("bad"); });
+}
+function go(n) {
+  step = n;
+  [1, 2, 3].forEach((i) => { $("p" + i).classList.toggle("hide", i !== n); $("s" + i).classList.toggle("on", i <= n); });
+  $("back").disabled = n === 1; $("next").textContent = n === 3 ? "Creer mon compte" : "Continuer";
+  if (n === 2 && !mapInit) { mapInit = true; pin = pinMap("pin", null, null, setLoc); }
+  if (n === 2 && pin) setTimeout(() => pin.map.invalidateSize(), 200);
+  window.scrollTo(0, 0);
+}
+$("back").onclick = () => go(step - 1);
+function vsel() { return (FIELDS[step] || []).filter((id) => $(id)).map((id) => "#" + id).join(","); }
+$("next").onclick = async () => {
+  $("gen").textContent = ""; $("next").disabled = true;
+  const body = collect();
+  if (step < 3) {
+    const r = await api("/api/signup?check=1", { ...body, consent_terms: true });
+    const mine = {}; Object.entries(r.data.errors || {}).forEach(([k, v]) => { if (FIELDS[step].includes(k)) mine[k] = v; });
+    $("next").disabled = false;
+    if (Object.keys(mine).length) return showErrors(mine);
+    showErrors({}); return go(step + 1);
+  }
+  const r = await api("/api/signup", body); $("next").disabled = false;
+  if (r.ok) { location.href = "/app"; return; }
+  const errs = r.data.errors || {}; showErrors(errs);
+  const where = [1, 2].find((s) => Object.keys(errs).some((k) => FIELDS[s].includes(k)));
+  if (where) { go(where); showErrors(errs); $("gen").textContent = "Corrigez les champs en rouge."; } else if (!Object.keys(errs).length) $("gen").textContent = r.data.error || "Creation impossible.";
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Segoe UI, Arial, sans-serif">
+<defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#dcd6bf" stroke-width="1"/></pattern></defs>
+<rect width="1280" height="800" fill="#f3efdd"/><rect width="1280" height="800" fill="url(#g)"/>
+<rect x="480" y="150" width="280" height="540" fill="#00979c" stroke="#006f73" stroke-width="2"/>
+<text x="490" y="140" font-size="22" text-anchor="start" fill="#000" font-weight="normal">ARD1</text>
+<text x="490" y="714" font-size="15" text-anchor="start" fill="#000" font-weight="normal">ARDUINO UNO</text>
+<text x="620" y="420" font-size="14" text-anchor="middle" fill="#fff" font-weight="normal">ATMEGA328P-PU</text>
+<text x="620" y="440" font-size="12" text-anchor="middle" fill="#fff" font-weight="normal">Program File : kizuna_sensor.ino.hex</text>
+<rect x="590" y="190" width="60" height="60" fill="#111" rx="4"/><text x="620" y="226" font-size="11" text-anchor="middle" fill="#fff">ATmega</text>
+<line x1="450" y1="250" x2="480" y2="250" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="244" width="12" height="12" fill="#222"/>
+<text x="500" y="255" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">RESET</text>
+<line x1="450" y1="470" x2="480" y2="470" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="464" width="12" height="12" fill="#222"/>
+<text x="500" y="475" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">PC0/ADC0</text>
+<text x="432" y="475" font-size="14" text-anchor="end" fill="#000" font-weight="bold">A0</text>
+<line x1="450" y1="498" x2="480" y2="498" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="492" width="12" height="12" fill="#222"/>
+<text x="500" y="503" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">PC1/ADC1</text>
+<text x="432" y="503" font-size="14" text-anchor="end" fill="#000" font-weight="bold">A1</text>
+<line x1="450" y1="526" x2="480" y2="526" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="520" width="12" height="12" fill="#222"/>
+<text x="500" y="531" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">PC2/ADC2</text>
+<text x="432" y="531" font-size="14" text-anchor="end" fill="#000" font-weight="normal">A2</text>
+<line x1="450" y1="554" x2="480" y2="554" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="548" width="12" height="12" fill="#222"/>
+<text x="500" y="559" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">PC3/ADC3</text>
+<text x="432" y="559" font-size="14" text-anchor="end" fill="#000" font-weight="normal">A3</text>
+<line x1="450" y1="582" x2="480" y2="582" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="576" width="12" height="12" fill="#222"/>
+<text x="500" y="587" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">PC4/ADC4/SDA</text>
+<text x="432" y="587" font-size="14" text-anchor="end" fill="#000" font-weight="normal">A4</text>
+<line x1="450" y1="610" x2="480" y2="610" stroke="#8b0000" stroke-width="2.5"/><rect x="480" y="604" width="12" height="12" fill="#222"/>
+<text x="500" y="615" font-size="13" text-anchor="start" fill="#fff" font-weight="bold">PC5/ADC5/SCL</text>
+<text x="432" y="615" font-size="14" text-anchor="end" fill="#000" font-weight="normal">A5</text>
+<rect x="748" y="194" width="12" height="12" fill="#222"/><line x1="760" y1="200" x2="800" y2="200" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="205" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">AREF</text>
+<rect x="748" y="250" width="12" height="12" fill="#222"/><line x1="760" y1="256" x2="800" y2="256" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="261" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PB5/SCK</text>
+<text x="806" y="251" font-size="14" text-anchor="start" fill="#000" font-weight="bold">13</text>
+<rect x="748" y="278" width="12" height="12" fill="#222"/><line x1="760" y1="284" x2="800" y2="284" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="289" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PB4/MISO</text>
+<text x="806" y="279" font-size="14" text-anchor="start" fill="#000" font-weight="normal">12</text>
+<rect x="748" y="306" width="12" height="12" fill="#222"/><line x1="760" y1="312" x2="800" y2="312" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="317" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PB3/MOSI/OC2A</text>
+<text x="806" y="307" font-size="14" text-anchor="start" fill="#000" font-weight="normal">11</text>
+<rect x="748" y="334" width="12" height="12" fill="#222"/><line x1="760" y1="340" x2="800" y2="340" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="345" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PB2/OC1B</text>
+<text x="806" y="335" font-size="14" text-anchor="start" fill="#000" font-weight="normal">10</text>
+<rect x="748" y="362" width="12" height="12" fill="#222"/><line x1="760" y1="368" x2="800" y2="368" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="373" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PB1/OC1A</text>
+<text x="806" y="363" font-size="14" text-anchor="start" fill="#000" font-weight="normal">9</text>
+<rect x="748" y="390" width="12" height="12" fill="#222"/><line x1="760" y1="396" x2="800" y2="396" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="401" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PB0/ICP1</text>
+<text x="806" y="391" font-size="14" text-anchor="start" fill="#000" font-weight="normal">8</text>
+<rect x="748" y="444" width="12" height="12" fill="#222"/><line x1="760" y1="450" x2="800" y2="450" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="455" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD7/AIN1</text>
+<text x="806" y="445" font-size="14" text-anchor="start" fill="#000" font-weight="normal">7</text>
+<rect x="748" y="472" width="12" height="12" fill="#222"/><line x1="760" y1="478" x2="800" y2="478" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="483" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD6/AIN0</text>
+<text x="806" y="473" font-size="14" text-anchor="start" fill="#000" font-weight="normal">6</text>
+<rect x="748" y="500" width="12" height="12" fill="#222"/><line x1="760" y1="506" x2="800" y2="506" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="511" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD5/T1/OC0B</text>
+<text x="806" y="501" font-size="14" text-anchor="start" fill="#000" font-weight="normal">5</text>
+<rect x="748" y="528" width="12" height="12" fill="#222"/><line x1="760" y1="534" x2="800" y2="534" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="539" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD4/T0/XCK</text>
+<text x="806" y="529" font-size="14" text-anchor="start" fill="#000" font-weight="normal">4</text>
+<rect x="748" y="556" width="12" height="12" fill="#222"/><line x1="760" y1="562" x2="800" y2="562" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="567" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD3/INT1/OC2B</text>
+<text x="806" y="557" font-size="14" text-anchor="start" fill="#000" font-weight="normal">3</text>
+<rect x="748" y="584" width="12" height="12" fill="#222"/><line x1="760" y1="590" x2="800" y2="590" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="595" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD2/INT0</text>
+<text x="806" y="585" font-size="14" text-anchor="start" fill="#000" font-weight="normal">2</text>
+<rect x="748" y="612" width="12" height="12" fill="#222"/><line x1="760" y1="618" x2="800" y2="618" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="623" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD1/TXD</text>
+<text x="806" y="613" font-size="14" text-anchor="start" fill="#000" font-weight="bold">1</text>
+<rect x="748" y="640" width="12" height="12" fill="#222"/><line x1="760" y1="646" x2="800" y2="646" stroke="#8b0000" stroke-width="2.5"/>
+<text x="740" y="651" font-size="13" text-anchor="end" fill="#fff" font-weight="bold">PD0/RXD</text>
+<text x="806" y="641" font-size="14" text-anchor="start" fill="#000" font-weight="normal">0</text>
+<circle cx="450" cy="470" r="9" fill="none" stroke="#ff9d00" stroke-width="3"/>
+<circle cx="450" cy="498" r="9" fill="none" stroke="#ff9d00" stroke-width="3"/>
+<circle cx="800" cy="256" r="9" fill="none" stroke="#ff9d00" stroke-width="3"/>
+<circle cx="800" cy="618" r="9" fill="none" stroke="#ff9d00" stroke-width="3"/>
+<rect x="300" y="250" width="20" height="80" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<polygon points="320,290 332,284 332,296" fill="#8b0000"/><line x1="332" y1="290" x2="352" y2="290" stroke="#8b0000" stroke-width="2.5"/>
+<polyline points="310,215 310,225" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<path d="M296 215 H324" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<text x="310" y="207" font-size="13" text-anchor="middle" fill="#8b0000" font-weight="bold">+5V</text>
+<polyline points="310,225 310,250" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="310,330 310,362" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="310,352 310,362" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<path d="M294 362 H326 M300 368 H320 M306 374 H314" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<text x="310" y="392" font-size="12" text-anchor="middle" fill="#555" font-weight="normal">GND</text>
+<text x="310" y="416" font-size="15" text-anchor="middle" fill="#000" font-weight="bold">RV1 — POT-HG 10k</text>
+<text x="310" y="434" font-size="12.5" text-anchor="middle" fill="#444" font-weight="normal">courant (pince) — 0 a 30 A</text>
+<rect x="95" y="250" width="20" height="80" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<polygon points="115,290 127,284 127,296" fill="#8b0000"/><line x1="127" y1="290" x2="147" y2="290" stroke="#8b0000" stroke-width="2.5"/>
+<polyline points="105,215 105,225" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<path d="M91 215 H119" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<text x="105" y="207" font-size="13" text-anchor="middle" fill="#8b0000" font-weight="bold">+5V</text>
+<polyline points="105,225 105,250" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="105,330 105,362" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="105,352 105,362" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<path d="M89 362 H121 M95 368 H115 M101 374 H109" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<text x="105" y="392" font-size="12" text-anchor="middle" fill="#555" font-weight="normal">GND</text>
+<text x="105" y="416" font-size="15" text-anchor="middle" fill="#000" font-weight="bold">RV2 — POT-HG 10k</text>
+<text x="105" y="434" font-size="12.5" text-anchor="middle" fill="#444" font-weight="normal">courant de fuite — 0 a 100 mA</text>
+<polyline points="352,290 390,290 390,470 450,470" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<text x="396" y="380" font-size="12.5" text-anchor="start" fill="#0b6b0b" font-weight="bold">vers A0</text>
+<polyline points="147,290 215,290 215,498 450,498" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="215" cy="290" r="4.5" fill="#0b6b0b"/>
+<text x="222" y="462" font-size="12.5" text-anchor="start" fill="#0b6b0b" font-weight="bold">vers A1</text>
+<polyline points="800,256 840,256" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<rect x="840" y="244" width="64" height="24" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<text x="872" y="236" font-size="14" text-anchor="middle" fill="#000" font-weight="bold">R1  330 Ω</text>
+<polyline points="904,256 940,256" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="940,240 940,272 968,256" fill="none" stroke="#8b0000" stroke-width="2.5"/><line x1="970" y1="240" x2="970" y2="272" stroke="#8b0000" stroke-width="2.5"/>
+<path d="M946 232 l12 -12 M958 238 l12 -12" stroke="#c00" stroke-width="2" fill="none"/>
+<text x="955" y="300" font-size="14" text-anchor="middle" fill="#000" font-weight="bold">D1  LED-RED</text>
+<text x="955" y="318" font-size="12.5" text-anchor="middle" fill="#444" font-weight="normal">alerte : fuite ≥ 30 mA</text>
+<polyline points="970,256 1030,256 1030,296" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1030,286 1030,296" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<path d="M1014 296 H1046 M1020 302 H1040 M1026 308 H1034" fill="none" stroke="#8b0000" stroke-width="2.5"/>
+<text x="1030" y="326" font-size="12" text-anchor="middle" fill="#555" font-weight="normal">GND</text>
+<rect x="900" y="440" width="150" height="70" fill="#fff8d8" stroke="#8b0000" stroke-width="2.5"/>
+<text x="975" y="432" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">VT1  VIRTUAL TERMINAL</text>
+<line x1="880" y1="478" x2="900" y2="478" stroke="#8b0000" stroke-width="2.5"/>
+<text x="908" y="483" font-size="13" text-anchor="start" fill="#000" font-weight="bold">RXD</text>
+<text x="975" y="503" font-size="12" text-anchor="middle" fill="#555" font-weight="normal">9600 bauds (facultatif)</text>
+<rect x="900" y="575" width="150" height="130" fill="#fff8d8" stroke="#8b0000" stroke-width="2.5"/>
+<text x="975" y="567" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">J1  COMPIM</text>
+<line x1="880" y1="618" x2="900" y2="618" stroke="#8b0000" stroke-width="2.5"/>
+<text x="908" y="623" font-size="13" text-anchor="start" fill="#000" font-weight="bold">RXD</text>
+<line x1="880" y1="642" x2="900" y2="642" stroke="#8b0000" stroke-width="2.5"/>
+<text x="908" y="647" font-size="13" text-anchor="start" fill="#000" font-weight="normal">TXD</text>
+<line x1="880" y1="666" x2="900" y2="666" stroke="#8b0000" stroke-width="2.5"/>
+<text x="908" y="671" font-size="13" text-anchor="start" fill="#000" font-weight="normal">RTS</text>
+<line x1="880" y1="690" x2="900" y2="690" stroke="#8b0000" stroke-width="2.5"/>
+<text x="908" y="695" font-size="13" text-anchor="start" fill="#000" font-weight="normal">CTS</text>
+<text x="975" y="725" font-size="12.5" text-anchor="middle" fill="#000" font-weight="bold">Physical port : COM5</text>
+<text x="975" y="742" font-size="12" text-anchor="middle" fill="#444" font-weight="normal">9600 bauds · 8 bits · sans parite · 1 stop</text>
+<polyline points="800,618 880,618" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="840" cy="618" r="4.5" fill="#0b6b0b"/>
+<polyline points="840,618 840,478 880,478" fill="none" stroke="#0b6b0b" stroke-width="3" stroke-linejoin="round"/>
+<text x="836" y="606" font-size="13" text-anchor="end" fill="#0b6b0b" font-weight="bold">TX</text>
+<text x="30" y="40" font-size="24" text-anchor="start" fill="#000" font-weight="bold">Branchement dans ISIS — carte capteur Kizuna Watt</text>
+<text x="30" y="64" font-size="13.5" text-anchor="start" fill="#444" font-weight="normal">Arduino UNO (bibliotheque The Engineering Projects) · fils en vert · broches utilisees entourees en orange : A0, A1, D13, TX (broche 1)</text>
+<text x="30" y="752" font-size="12.5" text-anchor="start" fill="#333" font-weight="normal">Reglages :  ARD1 > Program File = kizuna_sensor.ino.hex (export de l'IDE Arduino)  ·  COMPIM > Physical port = COM5, 9600 bauds</text>
+<text x="30" y="770" font-size="12.5" text-anchor="start" fill="#333" font-weight="normal">+5V = mode Terminals > POWER (nom « +5V »)  ·  GND = mode Terminals > GROUND.  Les broches A2-A5, 0, 2-12 restent libres.</text>
+<text x="30" y="788" font-size="12.5" text-anchor="start" fill="#333" font-weight="normal">Pont Python cote PC : python tools/serial_bridge.py --port COM6 ... (COM5 et COM6 = paire com0com)</text>
+</svg>

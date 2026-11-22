@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connexion — Kizuna Watt</title>
+<script>try{var t=localStorage.getItem("kw-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<script>try{var l=localStorage.getItem("kw-lang")||"fr";if(/^(en|ar|ja)$/.test(l)){document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";document.write('<script src="/static/i18n/'+l+'.js"><\/script>')}}catch(e){}</script>
+<link rel="icon" href="/static/logo-icon.png" type="image/png">
+<meta name="theme-color" content="#f3f6fb">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container"><div class="topnav"><a class="brand" href="/"><img class="logo logo-l" src="/static/logo-icon.png" alt="Kizuna Watt"><img class="logo logo-d" src="/static/logo-icon-dark.png" alt=""><span class="bn">Kizuna <b>Watt</b><small>طاقة · 絆 · STEG</small></span></a><span class="grow"></span><a class="btn sm" href="/signup">Creer un compte</a></div></div>
+<div class="authwrap" style="min-height:calc(100vh - 80px)">
+  <form class="glass glow authcard" id="f" autocomplete="on">
+    <h1 style="font-size:26px">Connexion</h1>
+    <p class="sub">Clients et compte STEG.</p>
+    <label class="f" for="email">Adresse e-mail</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label class="f" for="password">Mot de passe</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <div class="err" id="err" role="alert"></div>
+    <button class="btn primary" style="width:100%;margin-top:18px" id="go">Se connecter</button>
+    <p class="sub" style="margin-top:16px;text-align:center">Pas encore de compte ? <a href="/signup">Creer un compte</a></p>
+  </form>
+</div>
+<script src="/static/common.js"></script>
+<script src="/static/i18n.js"></script>
+<script>
+$("f").onsubmit = async (e) => {
+  e.preventDefault(); $("go").disabled = true; $("err").textContent = "";
+  const r = await api("/api/login", { email: $("email").value, password: $("password").value });
+  if (r.ok) { if (r.data.role !== "steg" && window.KW_LANG) await api("/api/profile", { lang: window.KW_LANG }); location.href = r.data.role === "steg" ? "/steg" : "/app"; }
+  else { $("err").textContent = r.data.error || "Connexion impossible."; $("go").disabled = false; }
+};
+</script>
+</body>
+</html>

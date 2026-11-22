@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon espace — Kizuna Watt</title>
+<script>try{var t=localStorage.getItem("kw-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<script>try{var l=localStorage.getItem("kw-lang")||"fr";if(/^(en|ar|ja)$/.test(l)){document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";document.write('<script src="/static/i18n/'+l+'.js"><\/script>')}}catch(e){}</script>
+<link rel="icon" href="/static/logo-icon.png" type="image/png">
+<meta name="theme-color" content="#f3f6fb">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="/"><img class="logo logo-l" src="/static/logo-icon.png" alt="Kizuna Watt"><img class="logo logo-d" src="/static/logo-icon-dark.png" alt=""><span class="bn">Kizuna <b>Watt</b><small>طاقة · 絆 · STEG</small></span></a>
+    <nav class="nav" id="nav">
+      <a data-t="home" class="on"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Consommation</a>
+      <a data-t="equip"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Equipements</a>
+      <a data-t="plan"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h6"/><path d="M19 15v6M16 18h6" /></svg>Plan de pointe <span class="badge bad hide" id="planBadge" style="margin-left:6px"></span></a>
+      <a data-t="sensor"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.7 4.7a10.5 10.5 0 0 0 0 14.6M19.3 4.7a10.5 10.5 0 0 1 0 14.6"/></svg>Capteur</a>
+      <a data-t="bills"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4"/></svg>Factures</a>
+      <a data-t="mimamori"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>Mimamori</a>
+      <a data-t="climate"><svg viewBox="0 0 24 24"><path d="M12 3v10M9 13a3 3 0 1 0 6 0 3 3 0 0 0-6 0zM12 3a2 2 0 0 0-2 2v6.3a4.5 4.5 0 1 0 4 0V5a2 2 0 0 0-2-2z"/></svg>Meteo et climat</a>
+      <a data-t="profile"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+    </nav>
+    <div class="foot"><div id="who" style="font-weight:650"></div><div class="sub" id="whoSub"></div><button class="btn sm" style="margin-top:10px;width:100%" onclick="logout()">Deconnexion</button></div>
+  </aside>
+
+  <main class="main">
+    <!-- CONSOMMATION -->
+    <section id="t-home">
+      <div class="topline"><div><div class="crumb"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>—</span><span>Consommation</span></div><h1 id="hello"></h1></div><span class="grow"></span><span class="pill" id="statePill"></span>
+        <span class="pill"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>24 dernieres heures</span>
+        <button class="btn primary" type="button" onclick="KW_PILLS[0].go()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/></svg>Demander a l'IA</button></div>
+      <div id="homeBody"></div>
+    </section>
+
+    <!-- EQUIPEMENTS -->
+    <section id="t-equip" class="hide">
+      <div class="topline"><h1>Mes equipements</h1></div>
+      <div class="glass" style="max-width:780px">
+        <p class="sub" style="margin-top:0">Declarez les appareils de votre maison. Le gestionnaire du reseau les voit sur votre fiche.</p>
+        <div id="eqEditor"></div>
+        <div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn primary" id="eqSave" data-validate="#eqEditor">Enregistrer</button><span class="sub" id="eqTotal"></span><span class="sub" id="eqMsg" style="color:var(--green)"></span></div>
+      </div>
+    </section>
+
+    <!-- PLAN DE POINTE -->
+    <section id="t-plan" class="hide">
+      <div class="topline"><h1>Plan de pointe</h1></div>
+      <div id="peaksBody"></div>
+      <div id="planBody"></div>
+    </section>
+
+    <!-- FACTURES : historique et saisie des factures payees -->
+    <section id="t-bills" class="hide">
+      <div class="topline"><div><div class="crumb"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>—</span><span>Factures</span></div><h1>Historique des factures</h1></div></div>
+      <div id="billsBody"><div class="sub">Chargement…</div></div>
+    </section>
+
+    <!-- MIMAMORI : veille de proximite -->
+    <section id="t-mimamori" class="hide">
+      <div class="topline"><div><div class="crumb"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>—</span><span>Mimamori</span></div><h1>Veille de proximite · 見守り</h1></div></div>
+      <div id="mmBody"><div class="sub">Chargement…</div></div>
+    </section>
+
+    <!-- CAPTEUR -->
+    <section id="t-sensor" class="hide">
+      <div class="topline"><h1>Mon capteur</h1></div>
+      <div class="grid g2">
+        <div class="glass">
+          <h2>Capteurs relies a mon compte</h2>
+          <div id="devList"></div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><input id="devName" required type="text" placeholder="Nom (ex. Tableau principal)" style="max-width:300px"><button class="btn primary" data-validate="#devName" onclick="addDevice()">+ Ajouter un capteur</button></div>
+          <div id="devNew" class="hide" style="margin-top:14px"></div>
+        </div>
+        <div class="glass">
+          <h2>Comment relier ma carte</h2>
+          <ol class="steps-list" style="max-width:none;margin-top:8px">
+            <li><b>Ajoutez un capteur</b> ici : vous recevez un identifiant et une cle secrete (affichee une seule fois).</li>
+            <li><b>Renseignez-les dans la carte</b> (firmware ESP32) avec l'adresse du serveur : voir <code>HARDWARE.md</code>.</li>
+            <li>La carte envoie ses mesures toutes les quelques secondes. Des qu'une mesure arrive, <b>votre consommation s'affiche</b>.</li>
+          </ol>
+          <p class="sub">Pour tester avec un circuit simule dans Proteus : voir <code>PROTEUS.md</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- METEO ET CLIMAT -->
+    <section id="t-climate" class="hide">
+      <div class="topline"><h1>Meteo et climat <span class="sub" id="climGov"></span></h1><span class="grow"></span>
+        <select id="climGran" style="width:auto"><option value="">Toutes les echelles</option><option value="day">Journalier</option><option value="month">Mensuel</option><option value="year">Annuel</option></select></div>
+      <div class="notice">Previsions pour votre gouvernorat : <b>meteo reelle (Open-Meteo)</b> a 16 jours et, quand l'equipe les a envoyees, previsions des <b>modeles d'intelligence artificielle</b> (mois, annee, scenarios). Ce ne sont pas des mesures.</div>
+      <div id="climate"></div>
+    </section>
+
+    <!-- PROFIL -->
+    <section id="t-profile" class="hide">
+      <div class="topline"><h1>Mon profil</h1></div>
+      <form class="glass" id="pf" novalidate style="max-width:780px">
+        <div class="sub" id="pfEmail"></div>
+        <div class="row">
+          <div><label class="f">Nom complet</label><input id="p_full_name" type="text" disabled></div>
+          <div><label class="f" for="p_phone">Telephone</label><input id="p_phone" required type="tel"><div class="err" data-e="phone"></div></div>
+        </div>
+        <div class="row">
+          <div><label class="f" for="p_governorate">Gouvernorat</label><select id="p_governorate"></select><div class="err" data-e="governorate"></div></div>
+          <div><label class="f" for="p_delegation">Delegation</label><input id="p_delegation" required type="text"></div>
+        </div>
+        <label class="f" for="p_address">Adresse</label><input id="p_address" required type="text"><div class="err" data-e="address"></div>
+        <div class="row">
+          <div><label class="f" for="p_postal_code">Code postal</label><input id="p_postal_code" required type="text" maxlength="4"><div class="err" data-e="postal_code"></div></div>
+          <div><label class="f" for="p_housing_type">Type de logement</label><select id="p_housing_type"></select></div>
+          <div><label class="f" for="p_lang">Langue</label><select id="p_lang"><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option><option value="ja">日本語</option></select></div>
+        </div>
+        <label class="f" for="p_occupants">Occupants</label><input id="p_occupants" required type="number" min="1" max="30"><div class="err" data-e="occupants"></div>
+        <label class="f">Position du domicile</label><div id="pfMap" class="map"></div><div class="err" data-e="location"></div>
+        <h3 style="margin-top:20px">Facture STEG</h3>
+        <div class="row">
+          <div><label class="f" for="p_steg_ref">Reference de facture / contrat</label><input id="p_steg_ref" required type="text"><div class="err" data-e="steg_ref"></div></div>
+          <div><label class="f" for="p_meter_number">Numero de compteur</label><input id="p_meter_number" type="text"><div class="err" data-e="meter_number"></div></div>
+        </div>
+        <label class="f" for="p_breaker_kw">Puissance souscrite (kW)</label><input id="p_breaker_kw" required type="number" min="1" max="60" step="0.1"><div class="err" data-e="breaker_kw"></div>
+        <div class="err" id="pfMsg" style="color:var(--green)"></div>
+        <button class="btn primary" id="pfSave" style="margin-top:14px">Enregistrer</button>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script src="/static/common.js"></script>
+<script src="/static/i18n.js"></script>
+<script>
+let ME = null, D = null, tab = "home", pfPin = null, pfLoc = null, eqEd = null, prevAlerts = "";
+const first = () => (ME.profile.full_name || "").split(" ")[0];
+
+document.querySelectorAll("#nav a").forEach((a) => (a.onclick = () => showTab(a.dataset.t)));
+function showTab(t) {
+  tab = t;
+  document.querySelectorAll("#nav a").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
+  ["home", "equip", "plan", "sensor", "bills", "mimamori", "climate", "profile"].forEach((s) => $("t-" + s).classList.toggle("hide", s !== t));
+  if (t === "climate") loadClimate();
+  if (t === "plan") { drawPeaks(); drawPlan(); markSeen(); }
+  if (t === "mimamori") startMimamori();
+  if (t === "bills") loadBills();
+  if (t === "profile") fillProfile();
+  if (t === "equip") renderEquip();
+  window.scrollTo(0, 0);
+}
+
+async function load() {
+  const r = await api("/api/my"); if (!r.ok) return;
+  D = r.data; renderHome(); if (tab === "sensor") renderDevices(); if (tab === "plan") { drawPeaks(); drawPlan(); } watchPeaks();
+}
+
+// ---------- Tableau de bord (modele « Finora ») ----------
+window.KW_PILLS = [
+  { label: "Analyse IA", icon: "spark", go: () => { showTab("home"); setTimeout(() => { const b = $("aiBox"); if (b) b.scrollIntoView({ behavior: "smooth", block: "center" }); }, 150); } },
+  { label: "Plan de pointe", icon: "list", go: () => showTab("plan") },
+  { label: "Recompenses", icon: "gift", go: () => { showTab("plan"); setTimeout(() => { const b = document.querySelector("#peaksBody .glow"); if (b) b.scrollIntoView({ behavior: "smooth", block: "start" }); }, 250); } },
+];
+window.KW_BELL = () => showTab("plan");
+window.KW_GEAR = () => showTab("profile");
+const CIRC = ["#7b6ee6", "#1db97c", "#2fa8ee", "#f29a4a", "#a7d94a", "#ea5455"];
+let homeBuilt = false, trendOn = true, trState = null;
+const dh = (ts) => new Date(ts * 1000).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+const hlab = (t0, n) => [...Array(n)].map((_, i) => String(new Date((t0 + i * 86400 / (n - 1)) * 1000).getHours()).padStart(2, "0") + "h");
+const miniCard = (id, icon, label, cls = "") => `<div class="glass mini ${cls}"><div class="mh"><div class="ico">${svgi(icon)}</div><div><div class="lbl">${label}</div><div class="val" id="${id}v"></div></div><span class="dl" id="${id}d"></span></div><div class="ch"><svg id="${id}c" viewBox="0 0 300 90" preserveAspectRatio="none"></svg><div class="xl" id="${id}x"></div></div></div>`;
+
+function buildHome() {
+  $("homeBody").innerHTML = `<div id="alertsBox"></div><div class="dash">
+    <div class="r1">${miniCard("m1", "bolt", "Puissance en direct", "hero-card")}${miniCard("m2", "pulse", "Energie aujourd'hui")}${miniCard("m3", "trend", "Pointe de puissance (24 h)")}${miniCard("m4", "gauge", "Charge de la puissance souscrite")}</div>
+    <div class="glass billcard" id="billCard"></div>
+    <div class="r2">
+      <div class="glass trend"><div class="th"><div><div class="sub">Tendance de consommation · mesure et prevision IA</div><div class="big"><span id="trV"></span><span class="badge2" id="trB"></span></div><div class="sub" id="trS"></div></div>
+        <div class="seg"><button id="trOn" class="on" type="button" title="Mesure + prevision IA">${svgi("spark")}</button><button id="trOff" type="button" title="Mesure seule">${svgi("line")}</button></div></div>
+        <div class="lgd"><span><i style="background:#1f9d8a"></i>Mesure</span><span><i style="background:#f29a4a"></i>Prevision IA</span><span><i style="background:rgba(242,154,74,.45)"></i>Plage d'erreur</span></div>
+        <div class="tw" id="trW"><svg id="trC"></svg><div class="tip" id="trT"></div></div></div>
+      <div class="glass gaugecard"><div class="gt"><h2>Repartition de la puissance declaree</h2><span class="chip">par circuit</span></div><div id="gaS"></div><div class="g3s" id="gaL"></div><div class="gnote" id="gaN"></div></div>
+    </div>
+    <div class="r3">
+      <div class="glass insight"><h2>Apercu IA</h2><div class="txt" id="inT"></div><div class="cnt" id="inC"></div><div id="inA"></div></div>
+      <div class="glass lcard"><div class="lt"><h2>Consommation par circuit</h2><button class="va" type="button" onclick="showTab('equip')">Modifier</button></div><div class="bigv" id="ciV"></div><div class="sub">puissance cumulee declaree</div><div class="stack" id="ciS"></div><div class="lst c1" id="ciL"></div></div>
+      <div class="glass lcard"><div class="lt"><h2>Equipements principaux</h2><button class="va" type="button" onclick="showTab('equip')">Tout voir</button></div><div class="lst c2" id="eqL" style="margin-top:10px"></div></div>
+    </div>
+    <div class="glass" id="aiBox"><div class="sub">Analyse par l'IA : chargement…</div></div></div>`;
+  homeBuilt = true;
+  const w = $("trW");
+  const hover = (e) => {
+    if (!trState) return; const r = w.getBoundingClientRect(), x = e.clientX - r.left, S = trState;
+    const t = S.t0 + (x - S.pl) / (S.W - S.pl - S.pr) * (S.t1 - S.t0); let best = null, bd = 1e15;
+    for (const p of S.all) { const d = Math.abs(p.t - t); if (d < bd) { bd = d; best = p; } } if (!best) return;
+    const px = S.X(best.t), py = S.Y(best.v), h = $("trH"); if (h) { h.setAttribute("opacity", 1); h.querySelector("line").setAttribute("x1", px); h.querySelector("line").setAttribute("x2", px); const c = h.querySelector("circle"); c.setAttribute("cx", px); c.setAttribute("cy", py); c.setAttribute("stroke", best.f ? "#f29a4a" : "#1f9d8a"); }
+    const tp = $("trT"); tp.innerHTML = `<span><i style="background:${best.f ? "#f29a4a" : "#1f9d8a"}"></i>${best.f ? "Prevision" : "Mesure"}</span><b>${fmt(Math.round(best.v))} W</b><em>${new Date(best.t * 1000).toLocaleString(LOCALE, { weekday: "short", hour: "2-digit", minute: "2-digit" })}</em>`;
+    tp.style.left = Math.min(Math.max(px, 90), S.W - 90) + "px"; tp.style.top = py + "px"; tp.classList.add("on");
+  };
+  w.addEventListener("mousemove", hover); w.addEventListener("mouseleave", () => { $("trT").classList.remove("on"); const h = $("trH"); if (h) h.setAttribute("opacity", 0); });
+  $("trOn").onclick = () => { trendOn = true; $("trOn").classList.add("on"); $("trOff").classList.remove("on"); drawTrend(); };
+  $("trOff").onclick = () => { trendOn = false; $("trOff").classList.add("on"); $("trOn").classList.remove("on"); drawTrend(); };
+  window.addEventListener("resize", () => { if (homeBuilt) drawTrend(); });
+  if (!aiLast || Date.now() - aiAt >= 60000) loadAI(); else drawAI(aiLast);
+}
+
+function updateHome() {
+  const rd = D.reading, limitW = (ME.profile.breaker_kw || 6) * 1000, pct = rd.power_w / limitW, S = D.series, vals = S.map((s) => s.avg_w), maxs = S.map((s) => s.max_w);
+  const u = D.usage || {}, b = u.baseline || {}, t0 = D.now - 86400, bad = D.alerts.some((x) => x.kind === "abnormal" || x.kind === "over_declared");
+  $("hello").textContent = bad ? "Consommation anormale detectee" : D.online ? `${first()}, vous avez consomme ${D.today_kwh.toFixed(1).replace(".", ",")} kWh aujourd'hui` : `${first()}, votre capteur est hors ligne`;
+  $("alertsBox").innerHTML = alertsHTML(D.alerts);
+  const dl = (id, txt, cls = "") => { const e = $(id); e.textContent = txt; e.className = "dl " + cls; };
+  // 1 : puissance en direct
+  $("m1v").textContent = fmt(Math.round(rd.power_w)) + " W";
+  if (b.ready && b.mean_w > 0) { const d = Math.round((rd.power_w / b.mean_w - 1) * 100); dl("m1d", (d > 0 ? "+" : "") + d + " % / habitude"); } else dl("m1d", "habitudes " + (b.days || 0) + "/" + (b.needed || 5) + " j");
+  $("m1c").innerHTML = miniLine(vals, { stroke: "#fff", fill: "rgba(255,255,255,.30)", dotColor: "#fff" }); $("m1x").innerHTML = hlab(t0, 5).map((x) => `<span>${x}</span>`).join("");
+  // 2 : energie du jour
+  const prev = D.daily.filter((d) => d.day !== new Date().toISOString().slice(0, 10) && d.kwh > 0.01), avg = prev.length ? prev.reduce((s, d) => s + d.kwh, 0) / prev.length : null;
+  $("m2v").textContent = D.today_kwh.toFixed(2).replace(".", ",") + " kWh"; dl("m2d", avg != null ? "moy. " + avg.toFixed(1).replace(".", ",") + " kWh/j" : "1er jour", "nu");
+  $("m2c").innerHTML = miniBars(vals, { color: "#1f9d8a", hi: vals.length ? vals.indexOf(Math.max(...vals)) : null }); $("m2x").innerHTML = hlab(t0, 5).map((x) => `<span>${x}</span>`).join("");
+  // 3 : pointe de puissance
+  const mi = maxs.length ? maxs.indexOf(Math.max(...maxs)) : -1;
+  $("m3v").textContent = mi >= 0 ? fmt(Math.round(maxs[mi])) + " W" : "—"; dl("m3d", mi >= 0 ? "a " + dh(S[mi].ts) : "", "nu");
+  $("m3c").innerHTML = miniLine(maxs, { stroke: "#f29a4a", fill: "rgba(242,154,74,.28)", dot: "max", dotColor: "#ea5455" }); $("m3x").innerHTML = hlab(t0, 5).map((x) => `<span>${x}</span>`).join("");
+  // 4 : charge de la puissance souscrite
+  $("m4v").textContent = Math.round(pct * 100) + " %"; dl("m4d", ME.profile.breaker_kw + " kW souscrits", "nu");
+  $("m4c").innerHTML = miniLine(vals.map((v) => v / limitW * 100), { stroke: "#f29a4a", fill: "rgba(242,154,74,.40)", dot: null }); $("m4x").innerHTML = hlab(t0, 5).map((x) => `<span>${x}</span>`).join("");
+  // tendance
+  $("trV").textContent = D.today_kwh.toFixed(2).replace(".", ",") + " kWh"; const bb = $("trB"); bb.textContent = D.online ? "en direct" : "hors ligne"; bb.className = "badge2" + (D.online ? "" : " dn");
+  const mean = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0; $("trS").textContent = `Moyenne sur 24 h : ${fmt(Math.round(mean))} W · pointe : ${mi >= 0 ? fmt(Math.round(maxs[mi])) : "—"} W · energie mesuree depuis l'installation : ${D.kwh_total.toFixed(1).replace(".", ",")} kWh`;
+  drawTrend();
+  // repartition par circuit (puissances declarees)
+  const circ = (D.plan.circuits || []).filter((c) => c.declared_w > 0), tot = circ.reduce((s, c) => s + c.declared_w, 0);
+  const top = circ.slice(0, 2), rest = circ.slice(2).reduce((s, c) => s + c.declared_w, 0), parts = top.map((c, i) => ({ label: c.circuit, value: c.declared_w, color: CIRC[i] })); if (rest > 0) parts.push({ label: "Autres circuits", value: rest, color: CIRC[2] });
+  $("gaS").innerHTML = tot ? semiGauge(parts, { center: kw(tot), sub: "puissance declaree", key: "circ" }) : `<div class="empty" style="padding:30px 0"><div class="sub">Declarez vos equipements pour voir la repartition.</div></div>`;
+  $("gaL").innerHTML = parts.map((p) => `<div><span class="gi"><i style="background:${p.color}"></i></span>${esc(p.label)}<b>${Math.round(100 * p.value / tot)} %</b></div>`).join("");
+  $("gaN").textContent = tot ? `${circ.length} circuit(s) declare(s) · puissances declarees (maximales), pas des mesures : tout ne fonctionne pas en meme temps.` : "";
+  $("ciV").textContent = kw(tot);
+  $("ciS").innerHTML = circ.slice(0, 6).map((c, i) => `<i style="flex:${c.declared_w};background:${CIRC[i]}" title="${esc(c.circuit)} : ${kw(c.declared_w)}"></i>`).join("");
+  $("ciL").innerHTML = circ.slice(0, 5).map((c, i) => `<div class="li"><span class="rg" style="border-color:${CIRC[i]}"></span><span class="nm">${esc(c.circuit)}</span><span class="mu">${D.equipment.filter((e) => (e.circuit || "Autre") === c.circuit).length} app.</span><span class="up">${Math.round(100 * c.declared_w / tot)} %</span><span class="nu">${kw(c.declared_w)}</span></div>`).join("") || '<div class="sub">Aucun equipement declare.</div>';
+  const eq = [...D.equipment].sort((x, y) => y.power_w * y.quantity - x.power_w * x.quantity).slice(0, 5);
+  $("eqL").innerHTML = eq.map((e) => `<div class="li"><span class="av">${esc((e.name || "?")[0].toUpperCase())}</span><span class="nm">${esc(e.name)}${e.quantity > 1 ? " ×" + e.quantity : ""}</span><span class="pr">${esc(e.priority || "")}</span><span class="nu">${kw(e.power_w * e.quantity)}</span></div>`).join("") || '<div class="sub">Aucun equipement declare.</div>';
+  drawInsight(); updateBill();
+}
+
+// ---------- Facture previsionnelle (tarif STEG applique aux mesures reelles) ----------
+const SLABC = ["#1db97c", "#a7d94a", "#f2b035", "#f29a4a", "#ea5455"], dtn = (m, d = 3) => (m / 1000).toFixed(d).replace(".", ",") + " DT";
+function updateBill() {
+  const el = $("billCard"); if (!el) return; const b = D.bill;
+  if (!b) { el.innerHTML = `<div class="sub">Facture previsionnelle : elle apparait des que votre capteur a envoye des mesures.</div>`; return; }
+  const mname = periodLabel(b.month);
+  const fin = b.slabs.filter((s) => s.upper != null), maxK = Math.max(b.high_kwh * 1.12, (fin.length ? fin[fin.length - 1].upper : 100) * 1.05, 120), pos = (k) => Math.min(100, k / maxK * 100);
+  let prev = 0; const segs = b.slabs.map((s, i) => { const hi = s.upper == null ? maxK : Math.min(s.upper, maxK), w = Math.max(0, pos(hi) - pos(prev)), lab = `${prev}–${s.upper == null ? "+" : s.upper} kWh · ${s.price} mil/kWh`; const html = `<i style="width:${w}%;background:${SLABC[Math.min(i, 4)]}" title="${lab}"></i>`; prev = s.upper == null ? maxK : s.upper; return html; }).join("");
+  const proj = b.projected, rows = proj.slabs.filter((s) => s.kwh > 0).map((s, i) => `<tr><td><i class="sd" style="background:${SLABC[Math.min(b.slabs.findIndex((x) => x.price === s.price), 4)]}"></i>${s.from_kwh}–${s.to_kwh == null ? "+" : s.to_kwh} kWh</td><td>${s.kwh.toFixed(1).replace(".", ",")} kWh</td><td>${s.price} mil</td><td class="r">${dtn(s.mil)}</td></tr>`).join("");
+  const next = b.marginal.left != null && b.slabs[b.marginal.index + 1] ? `Il reste <b>${b.marginal.left.toFixed(0)} kWh</b> avant la tranche a <b>${b.slabs[b.marginal.index + 1].price} mil/kWh</b>.` : "Vous etes dans la derniere tranche.";
+  el.innerHTML = `
+    <div class="bh">
+      <div class="bacc"><span class="live"><i></i>en direct</span><div class="sub">Montant atteint a ce jour</div><div class="bbig" id="bAcc">${accHTML(b.to_date.total)}</div>
+        <div class="sub">${b.to_date_kwh.toString().replace(".", ",")} kWh consommes · <b id="bRate">${b.cost_per_hour != null ? (b.cost_per_hour / 60).toFixed(2).replace(".", ",") + " mil / min" : "—"}</b> en ce moment</div></div>
+      <div class="bproj"><div class="sub">Facture previsionnelle · periode ${esc(mname)} (tous les 2 mois)</div>
+        <div class="bbig2">${dtn(proj.total)}<span class="chip warn" style="margin-left:10px;vertical-align:4px">estimation</span></div>
+        <div class="sub">prevue a la fin de la periode · fourchette probable (80 %) : <b>${dtn(b.low_total, 1)}</b> – <b>${dtn(b.high_total, 1)}</b> · ${b.projected_kwh.toString().replace(".", ",")} kWh prevus</div></div>
+      <div class="bnow"><div class="bn1">${b.cost_per_hour != null ? dtn(b.cost_per_hour, 3) + " / h" : "—"}</div><div class="sub">cout de votre consommation en ce moment</div></div></div>
+    <div class="mprog"><div class="mp1"><i style="width:${b.elapsed_pct}%"></i></div><div class="mp2"><span>${b.elapsed_pct.toFixed(0)} % de la periode ecoulee · ${b.days_left.toFixed(0)} j restants</span><span>facture ecoulee : <b>${dtn(b.to_date.total)}</b> sur <b>${dtn(proj.total)}</b> prevus</span></div></div>
+    <div class="bgrid">
+      <div><h3>Ou vous en etes dans les tranches</h3><div class="slabbar">${segs}<span class="mk now" style="left:${pos(b.to_date_kwh)}%" title="Aujourd'hui : ${b.to_date_kwh} kWh"></span><span class="mk end" style="left:${pos(b.projected_kwh)}%" title="Fin de periode prevue : ${b.projected_kwh} kWh"></span></div>
+        <div class="sl"><span><i class="mk now"></i>aujourd'hui</span><span><i class="mk end"></i>fin de periode prevue</span></div><p class="sub" style="margin-top:8px">${next} Chaque kWh de plus coute actuellement <b>${(b.marginal.price * (1 + b.projected.tva_energy_rate)).toFixed(0)} mil</b> TTC.</p></div>
+      <div><h3>Detail de la facture prevue</h3><table class="btab">${rows}</table>
+        <table class="btab sum"><tr><td>Energie HT</td><td class="r">${dtn(proj.energy_ht)}</td></tr><tr><td>TVA energie (${Math.round(proj.tva_energy_rate * 100)} %)</td><td class="r">${dtn(proj.tva_energy)}</td></tr>
+        <tr><td>Redevance de puissance (${b.kva} kVA) + TVA 19 %</td><td class="r">${dtn(proj.fee_ht + proj.tva_fee)}</td></tr><tr class="tot"><td>Total estime</td><td class="r">${dtn(proj.total)}</td></tr></table></div></div>
+    <div class="hline">${b.history.count ? `<span><b>${b.history.count}</b> facture(s) payee(s) enregistree(s)${b.history.last ? ` · derniere (${esc(periodLabel(b.history.last.period_start))}) : <b>${dtn(b.history.last.amount_mil)}</b> · prevision actuelle <b class="${b.history.last.delta_pct > 0 ? "dn" : "up"}">${b.history.last.delta_pct > 0 ? "+" : ""}${b.history.last.delta_pct.toString().replace(".", ",")} %</b>` : ""}${b.history.weight_pct ? ` · l'historique pese <b>${b.history.weight_pct} %</b> dans la prevision` : ""}</span>` : `<span>Saisissez vos <b>factures deja payees</b> : elles ameliorent la prevision.</span>`}<button class="btn sm" type="button" onclick="showTab('bills')">Historique et saisie</button></div>
+    <div class="gnote">Methode : ${esc(b.method)} (vos heures habituelles) · tarifs communiques par l'equipe, a valider · tranches progressives, bornes mensuelles x 2 · hors contribution collectivites locales, FTE et redevance audiovisuelle${b.partial_month ? " · mesures disponibles depuis le " + esc(b.measured_since.slice(8)) : ""}.</div>`;
+  { const cur = billTick ? billTick.base + billTick.rate * (Date.now() - billTick.t) / 3600000 : 0; billTick = b.cost_per_hour != null ? { base: Math.max(b.to_date.total, cur), t: Date.now(), rate: b.cost_per_hour } : null; }   // le compteur ne recule jamais      // le montant avance en continu entre deux mesures
+}
+let billTick = null;
+const accHTML = (m) => { const s = (m / 1000).toFixed(4).replace(".", ","); return `${s.slice(0, -1)}<small class="tiny">${s.slice(-1)}</small> DT`; };   // 4e decimale : montre l'avance en continu
+setInterval(() => { const e = $("bAcc"); if (!e || !billTick) return; e.innerHTML = accHTML(billTick.base + billTick.rate * (Date.now() - billTick.t) / 3600000); }, 250);
+
+function drawTrend() {
+  const wrap = $("trW"), svg = $("trC"); if (!wrap || !svg || !D) return;
+  const W = Math.max(360, Math.round(wrap.clientWidth)), H = Math.max(250, Math.round(wrap.clientHeight)), pl = 46, pr = 14, pt = 14, pb = 28;
+  const act = D.series.map((s) => ({ t: s.ts, v: s.avg_w })), okF = trendOn && aiLast && aiLast.forecast && aiLast.forecast.status === "ok";
+  const fc = okF ? aiLast.forecast.items.map((i) => ({ t: i.ts, v: i.kw * 1000, f: 1 })) : [], mae = okF && aiLast.forecast.backtest ? aiLast.forecast.backtest.mae_w : 0;
+  const t0 = D.now - 86400, t1 = fc.length ? D.now + 86400 : D.now, maxV = Math.max(10, ...act.map((p) => p.v), ...fc.map((p) => p.v + mae)) * 1.12;
+  const X = (t) => pl + (t - t0) / (t1 - t0) * (W - pl - pr), Y = (v) => H - pb - v / maxV * (H - pt - pb);
+  let o = `<defs><linearGradient id="trg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f9d8a" stop-opacity=".30"/><stop offset="1" stop-color="#1f9d8a" stop-opacity="0"/></linearGradient></defs>`;
+  for (let k = 0; k <= 4; k++) { const v = maxV * k / 4, y = Y(v); o += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="currentColor" stroke-opacity=".08"/><text x="${pl - 8}" y="${y + 4}" text-anchor="end">${v >= 1000 ? (v / 1000).toFixed(1) + "k" : Math.round(v)}</text>`; }
+  for (let h = 0; h <= (fc.length ? 8 : 4); h++) { const t = t0 + h * (t1 - t0) / (fc.length ? 8 : 4); o += `<text x="${X(t)}" y="${H - 8}" text-anchor="middle">${String(new Date(t * 1000).getHours()).padStart(2, "0")}h</text>`; }
+  if (act.length > 1) { const pts = act.map((p) => `${X(p.t)},${Y(p.v)}`).join(" "); o += `<polygon points="${X(act[0].t)},${Y(0)} ${pts} ${X(act[act.length - 1].t)},${Y(0)}" fill="url(#trg)"/><polyline points="${pts}" fill="none" stroke="#1f9d8a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`; }
+  if (fc.length) {
+    if (mae) o += `<polygon points="${fc.map((p) => `${X(p.t)},${Y(p.v + mae)}`).join(" ")} ${[...fc].reverse().map((p) => `${X(p.t)},${Y(Math.max(0, p.v - mae))}`).join(" ")}" fill="rgba(242,154,74,.22)"/>`;
+    o += `<polyline points="${fc.map((p) => `${X(p.t)},${Y(p.v)}`).join(" ")}" fill="none" stroke="#f29a4a" stroke-width="2.4" stroke-dasharray="7 6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    o += `<line x1="${X(D.now)}" x2="${X(D.now)}" y1="${pt}" y2="${H - pb}" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 5"/><text x="${X(D.now)}" y="${pt + 2}" text-anchor="middle" style="fill:var(--primary);font-weight:700">Maintenant</text>`;
+  }
+  o += `<g id="trH" opacity="0" pointer-events="none"><line y1="${pt}" y2="${H - pb}" stroke="#1f9d8a" stroke-opacity=".5" stroke-dasharray="4 4"/><circle r="6" fill="#fff" stroke="#1f9d8a" stroke-width="3"/></g>`;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = o;
+  trState = { W, H, pl, pr, t0, t1, X, Y, all: act.concat(fc) };
+}
+
+function drawInsight() {
+  if (!$("inT") || !D) return; const a = aiLast, an = a && a.anomaly, bad = (D.alerts || []).find((x) => x.kind === "abnormal" || x.kind === "over_declared");
+  let txt;
+  if (bad) txt = bad.text; else if (!a) txt = "Analyse en cours…"; else if (!a.status.available) txt = "Les modeles d'IA ne sont pas disponibles sur ce serveur.";
+  else if (an && an.items && an.items.length) txt = an.flagged ? `${an.flagged} heure(s) inhabituelle(s) parmi les ${an.hours_analyzed} dernieres heures analysees par l'Isolation Forest.` : "Aucune heure inhabituelle sur vos dernieres heures : consommation conforme a vos habitudes."; else txt = "Pas encore assez de mesures pour analyser vos habitudes.";
+  $("inT").textContent = txt.length > 200 ? txt.slice(0, 197) + "…" : txt;
+  const pk = (D.peaks || []).filter((p) => p.phase !== "ended").sort((x, y) => x.start_ts - y.start_ts)[0];
+  if (pk) { const dt = Math.max(0, pk.start_ts - D.now), h = Math.floor(dt / 3600), m = Math.round(dt % 3600 / 60); $("inC").innerHTML = pk.phase === "active" ? `En cours<small>jusqu'a ${dh(pk.end_ts)}</small>` : `${h ? h + " h " : ""}${m} min<small>avant la prochaine pointe</small>`; }
+  else $("inC").innerHTML = `—<small>aucune pointe annoncee</small>`;
+  let rows = [];
+  if (pk && pk.participates && pk.actions.length) rows = pk.actions.slice(0, 2).map((x) => ({ i: "list", t: (x.kind === "reporter" ? "Reporter " : x.kind === "moduler" ? "Moduler " : "Eteindre ") + x.name, b: x.kind === "reporter" ? "apres " + dh(x.restart_ts) : kw(x.w), go: "plan" }));
+  if (!rows.length) rows = [{ i: "list", t: "Regler ma participation aux pointes", b: "Plan", go: "plan" }, { i: "spark", t: "Voir l'analyse IA complete", b: "Voir", go: "ai" }];
+  $("inA").innerHTML = rows.map((r) => `<div class="act" style="cursor:pointer" onclick="${r.go === "ai" ? "KW_PILLS[0].go()" : "showTab('plan')"}"><span class="ai">${svgi(r.i)}</span><span>${esc(r.t)}</span><b>${esc(r.b)}</b></div>`).join("");
+}
+
+function renderHome() {
+  $("hello").textContent = "Bonjour " + first();
+  const hasDev = D.devices.length > 0, rd = D.reading;
+  const pill = !hasDev ? ["orange", "Aucun capteur"] : !rd ? ["orange", "En attente de la premiere mesure"] : D.online ? ["green", "Capteur en ligne"] : ["orange", "Capteur hors ligne"];
+  $("statePill").innerHTML = `<span class="dot ${pill[0]}"></span> ${pill[1]}`;
+  $("who").textContent = ME.profile.full_name; $("whoSub").textContent = `${ME.profile.governorate} · ${ME.profile.address}`;
+
+  if (!hasDev || !rd) {
+    homeBuilt = false; $("homeBody").innerHTML = `<div class="glass empty"><div class="ic">📡</div>
+      <h2>${!hasDev ? "Aucune consommation a afficher" : "En attente de la premiere mesure"}</h2>
+      <p class="sub" style="max-width:520px;margin:6px auto 0">${!hasDev ? "Votre consommation n'apparait que si vous reliez le capteur de votre maison. Rien n'est simule ni estime." : "Votre capteur est enregistre mais n'a encore rien envoye. Verifiez que la carte est allumee, connectee, et configuree avec l'identifiant et la cle."}</p>
+      ${!hasDev ? `<ol class="steps-list"><li><b>Ajoutez un capteur</b> dans l'onglet Capteur.</li><li><b>Configurez votre carte</b> avec l'identifiant et la cle.</li><li>Vos mesures s'affichent ici en direct.</li></ol><button class="btn primary" style="margin-top:16px" onclick="showTab('sensor')">Ajouter un capteur</button>` : `<button class="btn" style="margin-top:14px" onclick="showTab('sensor')">Voir mes capteurs</button>`}
+    </div>
+    <div class="glass" style="margin-top:18px"><h2>Mes equipements declares</h2><div class="sub">${D.equipment.length ? D.equipment.map((e) => `${esc(e.name)} ×${e.quantity}`).join(" · ") + ` — puissance cumulee si tout fonctionne : <b style="color:var(--strong)">${fmt(D.declared_w)} W</b>` : "Aucun equipement declare."}</div></div>`;
+    return;
+  }
+
+  if (!homeBuilt) buildHome();
+  updateHome();
+  const key = D.alerts.map((a) => a.kind).join();
+  if (key !== prevAlerts) { D.alerts.filter((a) => a.level !== "info").forEach((a) => toast(a.kind === "abnormal" ? "Consommation anormale" : a.kind === "over_declared" ? "Plus que vos equipements declares" : "Courant eleve", a.text.slice(0, 160), a.level === "critical" ? "bad" : "warn")); prevAlerts = key; }
+}
+
+// ---------- Meteo et climat ----------
+async function loadClimate() {
+  const g = $("climGran").value, r = await api("/api/forecasts" + (g ? "?granularity=" + g : "")); if (!r.ok) return;
+  $("climGov").textContent = "— " + r.data.governorate; renderClimate("climate", r.data);
+}
+$("climGran").onchange = loadClimate;
+
+// ---------- Plan de pointe (delestage par priorite) ----------
+const PCOL = { protege: "#1fa56d", inutile: "#2f6fe0", tolerable: "#0e98a5", decalable: "#f08a1c", confort: "#c8102e" };
+const kw = (w) => (w >= 1000 ? (w / 1000).toFixed(2).replace(".", ",") + " kW" : Math.round(w) + " W");
+async function setLevel(n) { const r = await api("/api/shedding", { level: n }); if (r.ok) { ME = await requireUser("client"); await load(); toast(n ? `Participation : jusqu'au palier ${n}` : "Vous ne participez pas", n ? "Seuls les foyers participants comptent dans le potentiel d'effacement vu par la STEG (en total anonyme par region)." : "", "ok"); } }
+// ---------- Pointes declarees par la STEG : planification des reports et notifications ----------
+const hhmm = (ts) => new Date(ts * 1000).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+const dayhm = (ts) => { const d = new Date(ts * 1000), t0 = new Date(); const same = d.toDateString() === t0.toDateString(), tom = d.toDateString() === new Date(t0.getTime() + 864e5).toDateString();
+  return (same ? "aujourd'hui" : tom ? "demain" : d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" })) + " a " + hhmm(ts); };
+const PH = { upcoming: ["warn", "A venir"], active: ["bad", "En cours"], ended: ["", "Terminee"] };
+let notified = JSON.parse(localStorage.getItem("kw_notified") || "{}");
+function pending() { return (D && D.peaks || []).filter((p) => p.phase !== "ended" && p.participates && p.status !== "done" && p.status !== "declined"); }
+function watchPeaks() {
+  const n = pending().length, b = $("planBadge"); b.textContent = n; b.classList.toggle("hide", !n); setBell(n);
+  for (const p of (D.peaks || [])) {
+    if (p.phase === "ended") continue;
+    const key = p.id + ":" + p.phase; if (notified[key]) continue; notified[key] = 1; localStorage.setItem("kw_notified", JSON.stringify(notified));
+    const title = p.phase === "active" ? "Pointe en cours" : "Pointe annoncee";
+    const txt = `${dayhm(p.start_ts)} → ${hhmm(p.end_ts)}` + (p.participates ? ` · ${p.actions.length} geste(s) pour vous` : " · vous ne participez pas");
+    toast(title, txt, "warn");
+    if ("Notification" in window && Notification.permission === "granted") new Notification("Kizuna Watt · " + title, { body: txt });
+  }
+}
+async function markSeen() { let any = false; for (const p of (D && D.peaks || [])) if (!p.status && p.phase !== "ended") { await api("/api/peaks/ack", { id: p.id, status: "seen" }); any = true; } if (any) load(); }
+async function ackPeak(id, status) { const r = await api("/api/peaks/ack", { id, status }); if (r.ok) { await load(); toast(status === "done" ? "Merci, c'est note" : "Note : vous ne suivez pas cette pointe", "Reponse declarative : elle compte dans les totaux anonymes vus par la STEG.", "ok"); } }
+async function askNotif() { if ("Notification" in window) { await Notification.requestPermission(); drawPeaks(); } }
+const dt = (m) => (m / 1000).toFixed(3).replace(".", ",") + " DT";
+const REASON = { rewarded: "Reduction mesuree : code delivre.", not_committed: "Vous n'aviez pas declare « c'est fait » avant la fin de la pointe.", no_sensor: "Aucun capteur relie : la reduction ne peut pas etre mesuree.", no_data: "Mesures insuffisantes pendant la pointe (capteur hors ligne ?).", no_baseline: "Habitude pas encore connue : il faut au moins 5 jours de mesures aux memes heures.", insufficient: "Reduction mesuree insuffisante par rapport a votre habitude." };
+function rewardLine(p) {
+  if (!p.reward_millimes) return "";
+  const r = p.result;
+  if (r) return `<div class="notice" style="margin:8px 0;${r.result === "rewarded" ? "border-color:rgba(52,211,153,.5);color:#b6f3d8" : ""}"><b>Recompense ${dt(p.reward_millimes)}</b> · ${esc(REASON[r.result] || r.result)}${r.reduction != null ? ` (mesure : ${r.measured_w} W contre ${r.baseline_w} W d'habitude, ${Math.round(r.reduction * 100)} %)` : ""}</div>`;
+  if (p.phase === "ended") return `<div class="notice" style="margin:8px 0"><b>Recompense ${dt(p.reward_millimes)}</b> · evaluation en cours.</div>`;
+  return `<div class="notice" style="margin:8px 0"><b>Recompense ${dt(p.reward_millimes)}</b> : un code de reduction sur votre facture STEG si votre capteur mesure au moins <b>15 % de moins</b> que d'habitude pendant la pointe. Dites « c'est fait » <b>avant la fin</b> de la pointe.</div>`;
+}
+async function copyCode(c) { try { await navigator.clipboard.writeText(c.replace(/\s/g, "")); toast("Code copie", "Collez-le au moment de payer votre facture STEG.", "ok"); } catch (e) { toast("Copie impossible", "Notez le code a la main.", "warn"); } }
+function rewardsBox() {
+  const R = D.rewards || [];
+  if (!R.length && !(D.peaks || []).some((p) => p.reward_millimes)) return "";
+  const avail = R.filter((r) => r.status === "available"), tot = avail.reduce((s, r) => s + r.value_millimes, 0);
+  return `<div class="glass glow" style="margin-bottom:18px"><div class="head"><h2>🎟️ Mes recompenses</h2><span class="chip">${avail.length ? dt(tot) + " disponibles" : "aucun code disponible"}</span></div>
+    <p class="sub" style="margin-top:0">Chaque code vaut une reduction sur votre <b>facture STEG</b> : donnez-le au moment du paiement. Il s'utilise <b>une seule fois</b> et expire apres 90 jours. Ne le partagez pas.</p>
+    ${R.length ? `<table><tr><th>Code</th><th>Valeur</th><th>Etat</th><th></th></tr>${R.map((r) => `<tr><td style="font-family:ui-monospace,monospace;font-size:16px;letter-spacing:1px">${r.code ? esc(r.code) : "•••• •••• •••• ••••"}</td><td>${dt(r.value_millimes)}</td><td>${r.status === "available" ? '<span class="badge">disponible</span>' : r.status === "used" ? `utilise (${dt(r.applied_millimes || 0)} appliques)` : "expire"}</td><td>${r.code ? `<button class="btn sm" onclick="copyCode('${r.code}')">Copier</button>` : ""}</td></tr>`).join("")}</table>` : '<p class="sub">Pas encore de code : ils sont delivres apres une pointe avec recompense, si votre capteur mesure la reduction.</p>'}</div>`;
+}
+function drawPeaks() {
+  const box = $("peaksBody"); if (!D) return; const list = (D.peaks || []);
+  const canNotif = "Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied";
+  const head = `<div class="glass" style="margin-bottom:18px"><div class="head"><h2>Pointes annoncees par la STEG</h2><span class="chip">${list.filter((p) => p.phase !== "ended").length} a venir ou en cours</span></div>
+    <p class="sub" style="margin-top:0">Quand la STEG annonce une pointe, l'application vous dit <b>quoi eteindre</b>, <b>quoi reporter et a quelle heure relancer</b>. Les heures de relance sont <b>echelonnees d'un foyer a l'autre</b> pour eviter que tout le monde relance en meme temps (effet rebond). Les notifications arrivent <b>tant que l'application est ouverte</b> (ni SMS ni notification en arriere-plan).
+    ${canNotif ? `<button class="btn sm" style="margin-left:8px" onclick="askNotif()">Activer les notifications du navigateur</button>` : ""}</p>
+    ${list.length ? "" : '<p class="sub">Aucune pointe annoncee pour le moment.</p>'}</div>`;
+  box.innerHTML = rewardsBox() + head + list.map((p) => {
+    const [cls, lab] = PH[p.phase];
+    const lines = p.actions.map((a) => a.kind === "reporter" ? `<li><b>${esc(a.name)}</b>${a.quantity > 1 ? " ×" + a.quantity : ""} · ${kw(a.w)} : <b>ne pas lancer pendant la pointe</b>, relancer apres <b>${hhmm(a.restart_ts)}</b>${a.too_long ? ` <span class="badge warn">depasse votre delai de ${a.defer_h} h</span>` : ""}</li>`
+      : a.kind === "moduler" ? `<li><b>${esc(a.name)}</b>${a.quantity > 1 ? " ×" + a.quantity : ""} : <b>moduler</b> (consigne +2 °C), environ ${kw(a.w)} liberables</li>`
+      : `<li><b>${esc(a.name)}</b>${a.quantity > 1 ? " ×" + a.quantity : ""} · ${kw(a.w)} : <b>eteindre</b> ou debrancher pendant la pointe</li>`).join("");
+    const act = p.phase === "ended" ? "" : !p.participates ? "" : p.status === "done" ? '<span class="chip">Vous avez suivi cette pointe</span>' : p.status === "declined" ? '<span class="chip">Vous ne la suivez pas</span>'
+      : `<button class="btn primary sm" onclick="ackPeak(${p.id},'done')">C'est fait / je le fais</button> <button class="btn sm" onclick="ackPeak(${p.id},'declined')">Je ne peux pas</button>`;
+    return `<div class="glass" style="margin-bottom:14px;${p.phase === "active" ? "border-color:rgba(255,90,90,.5)" : ""}"><div class="head"><h2>${dayhm(p.start_ts)} → ${hhmm(p.end_ts)}</h2><span class="badge ${cls}">${lab}</span></div>
+      <p class="sub" style="margin-top:0">${p.governorate ? "Region : " + esc(p.governorate) : "Toutes regions"} · palier demande : <b>${p.level}</b>${p.note ? " · " + esc(p.note) : ""}</p>
+      ${rewardLine(p)}
+      ${!p.participates ? `<div class="notice">Vous ne participez pas a cette pointe : choisissez un palier de participation plus bas dans cette page pour recevoir des gestes.</div>`
+        : lines ? `<ul class="steps-list" style="max-width:none;margin:8px 0">${lines}</ul><p class="sub">Au total environ <b>${kw(p.freed_w)}</b> (puissances declarees, palier effectif ${p.effective_level}).</p>` : '<p class="sub">Aucun equipement declare dans les paliers concernes.</p>'}
+      ${act}</div>`;
+  }).join("");
+}
+
+function drawPlan() {
+  if (!D || !D.plan) return; const P = D.plan, lv = P.level, total = P.declared_w || 1, box = $("planBody");
+  if (!D.equipment.length) { box.innerHTML = `<div class="glass empty"><div class="ic">🧩</div><h2>Declarez d'abord vos equipements</h2><p class="sub" style="max-width:520px;margin:6px auto 0">Le plan de pointe se calcule d'apres vos appareils, leur puissance et leur priorite.</p><button class="btn primary" style="margin-top:14px" onclick="showTab('equip')">Declarer mes equipements</button></div>`; return; }
+  const left = P.declared_w - P.potential_w, rd = D.reading;
+  const lvBtn = (n, t) => `<button class="btn sm ${lv === n ? "primary" : ""}" onclick="setLevel(${n})">${t}</button>`;
+  box.innerHTML = `
+    <div class="notice" style="margin-bottom:16px">Ce plan se calcule d'apres vos <b>equipements declares</b>. Les puissances sont les puissances <b>declarees</b> (maximales), pas votre consommation mesuree : tout ne fonctionne pas en meme temps. ${rd && D.online ? `Puissance mesuree maintenant : <b>${fmt(rd.power_w)} W</b>.` : ""}</div>
+    <div class="grid g4">
+      <div class="kpi"><b>${kw(P.declared_w)}</b><span>Puissance declaree totale</span></div>
+      <div class="kpi" style="border-color:rgba(52,211,153,.4)"><b>${kw(P.protected_w)}</b><span>Protegee : jamais coupee</span></div>
+      <div class="kpi hot"><b>${lv ? kw(P.potential_w) : "—"}</b><span>${lv ? `Effacable avec mon choix (${P.potential_pct} % du total)` : "Choisissez un palier ci-dessous"}</span></div>
+      <div class="kpi"><b>${lv ? kw(left) : kw(P.declared_w)}</b><span>${lv ? "Reste actif pendant la pointe" : "Reste actif"}</span></div></div>
+    <div class="glass" style="margin-top:18px"><h2>Jusqu'ou acceptez-vous de participer pendant une pointe ?</h2>
+      <p class="sub" style="margin-top:0">Vous restez libre : l'application <b>recommande</b>, elle ne coupe rien sans votre accord. Les foyers qui participent comptent (en total anonyme) dans le potentiel d'effacement de leur region.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${lvBtn(0, "Je ne participe pas")}${lvBtn(1, "Palier 1")}${lvBtn(2, "Jusqu'au palier 2")}${lvBtn(3, "Jusqu'au palier 3")}${lvBtn(4, "Jusqu'au palier 4")}</div></div>
+    <div class="glass" style="margin-top:18px"><h2>Repartition de la puissance declaree par priorite</h2>${donut(P.paliers.filter((r) => r.declared_w).map((r) => ({ label: r.label.replace(/^\d · /, "").split(" :")[0], value: r.declared_w, color: PCOL[r.priority] })), { center: kw(P.declared_w), sub: "declares", fmtv: (v) => kw(v), key: "plan" })}</div>
+    <div class="glass" style="margin-top:18px"><h2>Echelle de delestage</h2><div class="seg3">${P.paliers.filter((r) => r.declared_w).map((r) => `<i style="width:${r.declared_w / total * 100}%;background:${PCOL[r.priority]}" title="${esc(r.label)} : ${r.declared_w} W"></i>`).join("")}</div>
+      <div class="ladder">${[...P.paliers].map((r) => `<div class="step ${r.priority === "protege" ? "safe" : r.accepted ? "on" : ""}"><div class="top"><div><b style="color:${PCOL[r.priority]}">●</b> <b>${esc(r.label)}</b>${r.accepted ? ' <span class="chip">inclus dans mon choix</span>' : ""}</div>
+        <div class="w">${r.priority === "protege" ? kw(r.declared_w) : kw(r.shed_w)} <span class="sub" style="font-weight:400">${r.priority === "protege" ? "a proteger" : r.priority === "confort" ? `liberables (module de ${Math.round(P.confort_share * 100)} % sur ${kw(r.declared_w)})` : "liberables"}</span></div></div>
+        <div class="items">${r.items.length ? r.items.map((e) => `<span class="tag">${esc(e.name)}${e.quantity > 1 ? " ×" + e.quantity : ""} · ${kw(e.w)}${e.priority === "decalable" && e.defer_h != null ? ` · report ≤ ${e.defer_h} h` : ""} <span class="sub">(${esc(e.circuit)})</span></span>`).join("") : '<span class="sub">Aucun equipement dans ce palier.</span>'}</div></div>`).join("")}</div>
+      <p class="sub" style="margin-top:10px">Hypothese : un equipement de confort (climatiseur) est <b>module de ${Math.round(P.confort_share * 100)} %</b> (consigne a +2 °C, cycles courts) et non coupe.</p></div>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="glass"><h2>Par circuit du tableau</h2><table><tr><th>Circuit</th><th>Declare</th><th>Repartition</th></tr>${P.circuits.map((c) => `<tr><td>${esc(c.circuit)}</td><td>${kw(c.declared_w)}</td><td><div class="seg3" style="margin:0">${Object.entries(c.by_priority).map(([k, w]) => `<i style="width:${w / c.declared_w * 100}%;background:${PCOL[k]}" title="${esc(k)} : ${w} W"></i>`).join("")}</div></td></tr>`).join("")}</table></div>
+      <div class="glass"><h2>En cas de surcharge du disjoncteur</h2><p class="sub" style="margin-top:0">Votre puissance souscrite est de <b style="color:var(--strong)">${ME.profile.breaker_kw} kW</b>. Si la puissance approche cette limite, decalez dans cet ordre (le moins genant d'abord, puis le plus gourmand) :</p>
+        <ol class="steps-list" style="max-width:none">${D.overload_order.map((o) => `<li><b>${esc(o.name)}</b> · ${kw(o.w)} <span class="sub">(${esc(o.circuit)})</span></li>`).join("")}</ol></div></div>`;
+}
+
+// ---------- Analyse par les modeles d'IA ----------
+let aiAt = 0, aiLast = null;
+async function loadAI() {
+  if (aiLast && Date.now() - aiAt < 60000) return drawAI(aiLast);
+  aiAt = Date.now(); const r = await api("/api/my/ai"); if (!r.ok) return; aiLast = r.data; drawAI(aiLast);
+}
+function drawAI(a) { try { _drawAI(a); } finally { if (homeBuilt) { drawTrend(); drawInsight(); } } }
+function _drawAI(a) {
+  const box = $("aiBox"); if (!box) return;
+  if (!a.status.available) { box.innerHTML = `<div class="head"><h2>🤖 Analyse par l'IA</h2></div><div class="alert info">Analyse indisponible : ${esc(a.status.error || "modeles non charges")}</div>`; return; }
+  const an = a.anomaly, fc = a.forecast;
+  let left = "";
+  if (!an || an.error) left = `<div class="alert info">Analyse impossible : ${esc((an && an.error) || "")}</div>`;
+  else if (!an.items.length) left = `<div class="alert info">Pas encore assez de mesures : il faut au moins 10 mesures dans une heure.</div>`;
+  else left = `<div class="alert ${an.latest.anomaly ? "critical" : "good"}">Derniere heure analysee (${esc(an.latest.hour)}) : <b>${an.latest.anomaly ? "consommation anormale" : "consommation normale"}</b> — moyenne ${an.latest.mean_w} W, pic ${an.latest.max_w} W, indice ${an.latest.score}/100 (50 = limite du modele).</div>
+    <div class="bars" style="height:90px;margin-top:10px">${an.items.map((i) => `<div title="${esc(i.hour)} : ${i.mean_w} W, indice ${i.score}"><i style="height:${Math.max(3, i.score * 0.8)}px;background:${i.anomaly ? "linear-gradient(180deg,#ff5d66,#ff8a1f)" : "linear-gradient(180deg,#5aa2ff,#2ee6c5)"}"></i><span>${esc(i.hour.slice(-3))}</span></div>`).join("")}</div>
+    <div class="sub" style="margin-top:6px">${an.flagged} heure(s) anormale(s) sur ${an.hours_analyzed} analysee(s). Hauteur des barres : indice d'anomalie.</div>`;
+  let right = "";
+  if (!fc || fc.status === "error" || fc.status === "unavailable") right = `<div class="alert info">Prevision indisponible : ${esc((fc && fc.message) || "")}</div>`;
+  else if (fc.status === "insufficient") right = `<div class="alert info">${esc(fc.message)}</div><div class="bar" style="margin-top:8px"><i style="width:${Math.min(100, fc.have_days / fc.need_days * 100)}%"></i></div><div class="sub">${fc.have_days} / ${fc.need_days} jours d'historique</div>`;
+  else if (fc.status === "no_weather") right = `<div class="alert info">${esc(fc.message)}</div>`;
+  else right = `<div class="alert info"><b>Prevision experimentale</b> : le modele n'a pas ete valide sur des foyers tunisiens.</div><svg class="chart" id="aiChart" style="height:170px;margin-top:6px"></svg>
+    <div class="sub">${fc.backtest ? `Erreur observee sur les ${fc.backtest.hours} dernieres heures : <b style="color:var(--strong)">${fc.backtest.mae_w} W</b> en moyenne (${fc.backtest.mape_pct} % ; consommation moyenne ${fc.backtest.mean_actual_w} W).` : "Pas encore assez d'heures mesurees pour calculer l'erreur du modele."} Donnees d'entree manquantes : ${fc.missing_inputs_pct} %.</div>`;
+  box.innerHTML = `<div class="head"><h2>🤖 Analyse par les modeles d'IA de l'equipe</h2><span class="chip">mesures reelles de votre capteur</span></div>
+    <div class="grid g2"><div><h3>Detection d'anomalies (Isolation Forest)</h3>${left}</div><div><h3>Prevision des 24 prochaines heures (XGBoost)</h3>${right}</div></div>
+    ${a.status.warnings && a.status.warnings.length ? `<p class="sub" style="margin-top:10px">Note technique : ${esc(a.status.warnings[0])}</p>` : ""}`;
+  if (fc && fc.status === "ok") { const n = fc.items.length; lineChart("aiChart", fc.items.map((i, k) => ({ x: k / (n - 1), y: i.kw * 1000 })), { color: "#c8102e", unit: "W", labels: [0, 6, 12, 18, 23].map((k) => ({ x: k / (n - 1), text: fc.items[k].hour.slice(-3) })) }); }
+}
+
+// ---------- Historique des factures payees ----------
+const shortP = (ps) => { const m = +ps.slice(5, 7), f = (mm) => new Intl.DateTimeFormat(LOCALE, { month: "short" }).format(new Date(2026, mm - 1, 15)); return `${f(m)}-${f(m % 12 + 1)} ${ps.slice(2, 4)}`; };
+async function loadBills() { const r = await api("/api/bills"); if (!r.ok) return; billsData = r.data; renderBills(); }
+let billsData = null;
+function renderBills() {
+  const d = billsData, h = d.history, rows = h.rows, cur = D && D.bill, last8 = rows.slice(-8);
+  const proj = cur ? cur.projected.total : null, mx = Math.max(1, ...last8.map((x) => x.amount_mil), proj || 0);
+  const bars = last8.map((x) => `<div title="${esc(periodLabel(x.period_start))} : ${dtn(x.amount_mil)} · ${x.kwh} kWh${x.kwh_inferred ? " (deduit)" : ""}"><b>${Math.round(x.amount_mil / 1000)}</b><i style="height:${Math.max(4, x.amount_mil / mx * 100)}%"></i><span>${shortP(x.period_start)}</span></div>`).join("")
+    + (proj ? `<div title="Prevision en cours : ${dtn(proj)}"><b>${Math.round(proj / 1000)}</b><i class="pr" style="height:${Math.max(4, proj / mx * 100)}%"></i><span>${shortP(d.current)} prevu</span></div>` : "");
+  const opt = d.periods.map((p) => `<option value="${p.value}">${esc(periodLabel(p.value))}${p.current ? " (en cours)" : ""}</option>`).join("");
+  const info = cur && cur.history ? cur.history : null;
+  $("billsBody").innerHTML = `<div class="dash">
+    <div class="r2"><div class="glass"><div class="head"><h2>Montants payes par periode (DT)</h2><span class="chip">${rows.length} facture(s)</span></div>
+        ${rows.length ? `<div class="bhist">${bars}</div>` : `<div class="empty" style="padding:30px 0"><div class="ic">🧾</div><h2>Aucune facture enregistree</h2><p class="sub">Saisissez vos factures deja payees : la prevision s'en sert tout de suite.</p></div>`}
+        <p class="sub" style="margin-top:8px">La barre hachuree est la <b>prevision de la periode en cours</b>. Survolez une barre pour le detail.</p></div>
+      <div class="glass"><h2>Saisir une facture deja payee</h2><p class="sub" style="margin-top:0">Periode de 2 mois, montant paye (en dinars) et, si vous l'avez, la consommation lue sur la facture. Une facture deja saisie pour la meme periode est remplacee.</p>
+        <label class="f" for="bhP">Periode</label><select id="bhP">${opt}</select>
+        <div class="row"><div><label class="f" for="bhA">Montant paye (DT)</label><input id="bhA" required type="number" min="1" max="5000" step="0.001" placeholder="ex. 138,950"></div><div><label class="f" for="bhK">Consommation <small>(kWh, facultatif)</small></label><input id="bhK" type="number" min="1" step="0.1" placeholder="ex. 588"></div></div>
+        <label class="f" for="bhD">Date de paiement <small>(facultatif)</small></label><input id="bhD" type="date">
+        <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap"><button class="btn primary" id="bhS" type="button" data-validate="#bhA,#bhK,#bhD">Enregistrer la facture</button><span class="sub" id="bhM"></span></div></div></div>
+    <div class="r1">
+      <div class="glass kpi"><b>${h.daily_avg_kwh != null ? h.daily_avg_kwh.toString().replace(".", ",") + " kWh/j" : "—"}</b><span>moyenne des 3 dernieres factures</span></div>
+      <div class="glass kpi"><b>${info && info.last ? (info.last.delta_pct > 0 ? "+" : "") + info.last.delta_pct.toString().replace(".", ",") + " %" : "—"}</b><span>prevision actuelle vs derniere facture</span></div>
+      <div class="glass kpi"><b>${info && info.last_year ? dtn(info.last_year.amount_mil, 1) : "—"}</b><span>meme periode l'an dernier${info && info.last_year ? " (" + (info.last_year.delta_pct > 0 ? "+" : "") + info.last_year.delta_pct.toString().replace(".", ",") + " % pour cette annee)" : ""}</span></div>
+      <div class="glass kpi"><b>${info ? info.weight_pct + " %" : "—"}</b><span>poids de l'historique dans la prevision${h.calibrated ? " · capteur calibre ×" + h.calib.toString().replace(".", ",") : ""}</span></div></div>
+    <div class="glass"><div class="head"><h2>Vos factures payees</h2></div>
+      ${rows.length ? `<div style="overflow:auto"><table><tr><th>Periode</th><th>Montant paye</th><th>Consommation</th><th>Ecart avec le bareme</th><th>Mesure par le capteur</th><th>Payee le</th><th></th></tr>
+      ${[...rows].reverse().map((x) => `<tr><td><b>${esc(periodLabel(x.period_start))}</b></td><td><b>${dtn(x.amount_mil)}</b></td><td>${x.kwh.toString().replace(".", ",")} kWh ${x.kwh_inferred ? '<span class="chip warn" title="Deduit du montant avec le bareme">deduit</span>' : ""}</td>
+        <td>${x.kwh_inferred ? "—" : (x.gap_pct > 0 ? "+" : "") + x.gap_pct.toString().replace(".", ",") + " %"}</td><td>${x.sensor_kwh != null ? x.sensor_kwh.toString().replace(".", ",") + " kWh" + (x.ratio ? ` <span class="chip">×${x.ratio.toString().replace(".", ",")}</span>` : "") : '<span class="sub">periode non mesuree</span>'}</td>
+        <td>${x.paid_on ? new Date(x.paid_on).toLocaleDateString(LOCALE) : "—"}</td><td><button class="btn sm danger" type="button" onclick="delBill('${x.period_start}')">Supprimer</button></td></tr>`).join("")}</table></div>` : '<div class="sub">Rien pour le moment.</div>'}
+      <div class="notice" style="margin-top:14px"><b>Comment ca aide la prevision</b> : (1) le <b>cycle de facturation</b> est deduit de vos periodes ; (2) tant que le capteur a peu de jours de mesures, la fin de periode est tiree vers la <b>moyenne de vos dernieres factures</b> ; (3) si une facture couvre une periode entierement mesuree par le capteur, le rapport entre kWh factures et kWh mesures <b>calibre le capteur</b>. Le kWh deduit d'un montant est approximatif (taxes non modelisees : colonne « ecart »).</div></div></div>`;
+  $("bhS").onclick = async () => {
+    const r = await api("/api/bills", { period_start: $("bhP").value, amount_dt: $("bhA").value, kwh: $("bhK").value, paid_on: $("bhD").value });
+    $("bhM").style.color = r.ok ? "var(--green)" : "var(--red)"; $("bhM").textContent = r.ok ? "Enregistre : la prevision est mise a jour." : (r.data && r.data.error) || "Erreur";
+    if (r.ok) { await load(); loadBills(); toast("Facture enregistree", "La prevision tient compte de votre historique.", "ok"); }
+  };
+}
+async function delBill(ps) { const r = await api("/api/bills/delete", { period_start: ps }); if (r.ok) { await load(); loadBills(); toast("Facture supprimee", "", "ok"); } }
+
+// ---------- Mimamori : veille d'un proche (activite electrique inhabituelle) ----------
+const MMS = {
+  ok: ["#1db97c", "Tout va bien", "異常なし"], attention: ["#f2a516", "Activite plus tardive que d'habitude", "いつもより遅い"], alert: ["#ea5455", "Aucune activite : votre proche est prevenu", "活動なし · ご家族に通知"],
+  paused: ["#8ea3b0", "Veille suspendue", "一時停止"], learning: ["#8ea3b0", "Apprentissage de votre rythme", "学習中"], offline: ["#8ea3b0", "Capteur hors ligne", "オフライン"], disabled: ["#8ea3b0", "Veille desactivee", "無効"],
+};
+let mmBuilt = false, mmTimer = null, mmData = null;
+function startMimamori() { loadMimamori(); if (!mmTimer) mmTimer = setInterval(() => { if (tab === "mimamori") loadMimamori(); }, 6000); }
+async function loadMimamori() { const r = await api("/api/mimamori"); if (!r.ok) return; mmData = r.data; if (!mmBuilt) buildMimamori(); fillMimamori(); }
+function buildMimamori() {
+  $("mmBody").innerHTML = `<div class="dash">
+    <div class="r2"><div class="glass mmhero" id="mmHero"></div>
+      <div class="glass"><h2>Reglages de la veille</h2><p class="sub" style="margin-top:0">Vous gardez la main : la veille ne s'active qu'avec votre accord, vous choisissez qui prevenir, et vous pouvez la suspendre a tout moment.</p>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="mmOn"> <span><b>Activer la veille mimamori</b></span></label>
+        <div class="row"><div><label class="f" for="mmName">Proche a prevenir</label><input id="mmName" type="text" maxlength="60" placeholder="ex. Nadia (ma fille)"></div><div><label class="f" for="mmEmail">Son e-mail</label><input id="mmEmail" type="email" maxlength="120" placeholder="nadia@exemple.com" autocomplete="off"></div></div>
+        <label class="check"><input type="checkbox" id="mmCons"> <span>J'accepte que mon <b>rythme d'activite electrique</b> (a quelle heure il y a de l'activite, pas ma consommation) soit analyse, et qu'un e-mail soit envoye a mon proche si aucune activite n'est detectee a l'heure habituelle.</span></label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn primary" id="mmSave" type="button" data-validate="#mmName,#mmEmail">Enregistrer</button><span class="sub" id="mmMsg"></span></div>
+        <div id="mmLink" style="margin-top:14px"></div></div></div>
+    <div class="glass"><div class="head"><h2>Activite des 48 dernieres heures</h2><span class="chip" id="mmChip"></span></div>
+      <p class="sub" style="margin-top:0">Chaque barre est une heure : <b style="color:#1f9d8a">turquoise</b> = activite detectee, <b>grise</b> = seulement les appareils qui tournent toujours (frigo, box). Le trait pointille est le seuil d'activite.</p>
+      <div class="mmtl" id="mmTL"></div><div class="mmtx" id="mmTX"></div></div>
+    <div class="r2"><div class="glass"><div class="head"><h2>Journal des alertes</h2></div><div id="mmEv"></div></div>
+      <div class="glass"><div class="head"><h2>Messages au proche</h2><span class="chip warn" id="mmSmsMode">simules</span></div><p class="sub" style="margin-top:0" id="mmSmsNote">Aucun e-mail reel n'est envoye tant que le service d'e-mail n'est pas branche : voici ce qui partirait.</p><div id="mmSms"></div></div></div>
+  </div>`;
+  mmBuilt = true;
+  $("mmSave").onclick = async () => {
+    const r = await api("/api/mimamori", { enabled: $("mmOn").checked, contact_name: $("mmName").value, contact_email: $("mmEmail").value, consent: $("mmCons").checked });
+    $("mmMsg").style.color = r.ok ? "var(--green)" : "var(--red)"; $("mmMsg").textContent = r.ok ? "Enregistre." : (r.data && r.data.error) || "Erreur"; if (r.ok) { mmDirty = false; loadMimamori(); }
+  };
+  ["mmOn", "mmName", "mmEmail", "mmCons"].forEach((id) => $(id).addEventListener("input", () => (mmDirty = true)));
+  const reqSync = () => { $("mmName").required = $("mmEmail").required = $("mmOn").checked; };
+  $("mmOn").addEventListener("change", reqSync); reqSync();
+}
+let mmDirty = false;
+async function mmDo(path, body) { const r = await api(path, body || {}); if (r.ok) { toast("C'est note", "", "ok"); loadMimamori(); } else toast("Impossible", (r.data && r.data.error) || "", "bad"); }
+function fillMimamori() {
+  const d = mmData, st = d.status, s = d.settings, v = MMS[st.state] || MMS.learning, ago = (ts) => { const m = Math.round((d.now - ts) / 60); return m < 90 ? `il y a ${m} min` : `il y a ${Math.round(m / 60)} h`; };
+  const lines = [];
+  if (st.last_active_ts) lines.push(`Derniere activite : <b>${ago(st.last_active_ts)}</b> (${dh(st.last_active_ts)})`);
+  if (st.state === "alert" || st.state === "attention") lines.push(`Sans activite depuis <b>${st.gap_h} h</b> · habituel : jusqu'a <b>${st.typical_h} h</b>`);
+  if (st.state === "learning" && st.days != null) lines.push(`${st.days} / ${st.needed} jours de mesures pour apprendre votre rythme`);
+  if (st.state === "paused") lines.push(`Suspendue jusqu'au ${new Date(st.paused_until * 1000).toLocaleDateString(LOCALE)} a ${dh(st.paused_until)}`);
+  if (st.state === "disabled") lines.push("Activez la veille et indiquez un proche a prevenir.");
+  $("mmHero").style.setProperty("--c", v[0]);
+  $("mmHero").innerHTML = `<div class="mmb">${st.state === "ok" ? "✓" : st.state === "alert" || st.state === "attention" ? "!" : st.state === "paused" ? "⏸" : "…"}</div><div><div class="sub">Etat de la veille · 見守り</div><div class="mmt">${v[1]}</div><div class="mmj">${v[2]}</div><div class="sub" style="margin-top:6px">${lines.join("<br>")}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${st.state === "alert" || st.state === "attention" ? `<button class="btn primary sm" onclick="mmDo('/api/mimamori/ok')">Je vais bien</button>` : ""}
+      ${s.enabled ? (st.state === "paused" ? `<button class="btn sm" onclick="mmDo('/api/mimamori/pause',{days:0})">Reprendre la veille</button>` : `<button class="btn sm" onclick="mmDo('/api/mimamori/pause',{days:1})">Pause 1 jour</button><button class="btn sm" onclick="mmDo('/api/mimamori/pause',{days:3})">Voyage 3 jours</button><button class="btn sm" onclick="mmDo('/api/mimamori/pause',{days:7})">Voyage 7 jours</button>`) : ""}</div></div>`;
+  if (!mmDirty) { $("mmOn").checked = s.enabled; $("mmName").value = s.contact_name || ""; $("mmEmail").value = s.contact_email || ""; $("mmCons").checked = !!s.consent_ts; $("mmOn").dispatchEvent(new Event("change")); }
+  $("mmLink").innerHTML = s.token ? `<div class="notice"><b>Page du proche</b> : il peut suivre l'etat (sans voir votre consommation) sans creer de compte.<br><a href="/mimamori?t=${s.token}" target="_blank">${location.origin}/mimamori?t=${s.token.slice(0, 8)}…</a> <button class="btn sm" type="button" onclick="navigator.clipboard.writeText(location.origin + '/mimamori?t=${s.token}'); toast('Lien copie', 'A envoyer a votre proche.', 'ok')">Copier</button></div>` : "";
+  const tl = st.timeline || [], mx = Math.max(100, ...tl.map((x) => x.w || 0)), thr = st.thr_w || 0;
+  $("mmChip").textContent = st.floor_w != null ? `fond ${st.floor_w} W · seuil ${st.thr_w} W` : "";
+  $("mmTL").innerHTML = tl.length ? tl.map((x) => `<i class="${x.w == null ? "na" : x.active ? "on" : ""}" style="height:${x.w == null ? 6 : Math.max(5, x.w / mx * 100)}%" title="${new Date(x.ts * 1000).toLocaleString(LOCALE, { weekday: "short", hour: "2-digit", minute: "2-digit" })} · ${x.w == null ? "pas de mesure" : x.w + " W · " + (x.active ? "activite" : "repos")}"></i>`).join("") + (thr ? `<span class="thr" style="bottom:${thr / mx * 100}%"></span>` : "") : '<div class="sub">Pas encore assez de mesures.</div>';
+  $("mmTX").innerHTML = tl.length ? [0, 12, 24, 36, 47].map((k) => `<span>${new Date(tl[k].ts * 1000).toLocaleString(LOCALE, { weekday: "short", hour: "2-digit" })}</span>`).join("") : "";
+  $("mmEv").innerHTML = d.events.length ? d.events.map((e) => `<div class="mmrow"><span class="chip ${e.level === "alert" ? "bad" : "warn"}">${e.level === "alert" ? "alerte" : "attention"}</span><div><div>${esc(e.message)}</div><div class="sub">${new Date(e.ts * 1000).toLocaleString(LOCALE, { weekday: "short", hour: "2-digit", minute: "2-digit" })}${e.resolved_ts ? " · leve (" + ({ activite: "activite reprise", client: "vous avez confirme", pause: "pause", escalade: "passee en alerte" }[e.resolved_by] || "resolu") + ")" : " · <b>en cours</b>"}</div></div></div>`).join("") : '<div class="sub">Aucune alerte pour le moment.</div>';
+  const realSms = d.sms_mode && d.sms_mode !== "simulation"; $("mmSmsMode").textContent = realSms ? "envoi reel" : "simules"; $("mmSmsMode").className = "chip" + (realSms ? "" : " warn");
+  $("mmSmsNote").textContent = realSms ? "Les alertes partent par e-mail au proche. Chaque message est envoye une fois ; le statut est indique." : "Aucun e-mail reel n'est envoye tant que le service d'e-mail n'est pas branche : voici ce qui partirait.";
+  $("mmSms").innerHTML = d.sms.length ? d.sms.map((m) => `<div class="mmrow"><span class="chip">${m.kind === "alerte" ? "alerte" : "rassurant"}</span><span class="chip ${m.status === "envoye" ? "" : "warn"}">${({ simule: "simule", en_attente: "en attente", envoye: "envoye", echec: "echec", bloque: "bloque" })[m.status] || esc(m.status)}</span><div><div class="sub"><b>${esc(m.to_name || "")}</b> · ${esc(m.to_phone || "")}${m.subject ? " · " + esc(m.subject) : ""} · ${new Date(m.ts * 1000).toLocaleString(LOCALE, { hour: "2-digit", minute: "2-digit" })}</div><div style="white-space:pre-line;font-size:12.5px">${esc(m.body)}</div></div></div>`).join("") : '<div class="sub">Aucun message.</div>';
+}
+
+// ---------- Equipements ----------
+function renderEquip() {
+  eqEd = equipmentEditor("eqEditor", D ? D.equipment : ME.equipment);
+  const upd = () => ($("eqTotal").textContent = `Puissance cumulee : ${fmt(eqEd.total())} W`); upd();
+  $("eqEditor").addEventListener("input", upd); $("eqEditor").addEventListener("click", () => setTimeout(upd, 0)); $("eqEditor").addEventListener("change", () => setTimeout(upd, 0));
+}
+$("eqSave").onclick = async () => {
+  $("eqMsg").textContent = "";
+  const r = await api("/api/equipment", { items: eqEd.get() });
+  if (r.ok) { $("eqMsg").textContent = "Enregistre."; ME = await requireUser("client"); load(); } else toast("Enregistrement impossible", r.data.error || "", "bad");
+};
+
+// ---------- Capteurs ----------
+function renderDevices() {
+  const list = D.devices;
+  $("devList").innerHTML = list.length ? list.map((d) => `<div class="client" style="cursor:default"><div class="row1"><div><b>${esc(d.name)}</b> <span class="chip">${esc(d.id)}</span>
+    <div class="sub">${d.online ? "En ligne" : d.last_seen ? "Hors ligne · derniere mesure " + timeAgo(d.last_seen, D.now) : "Jamais connecte"} · ${d.kwh_total.toFixed(3)} kWh mesures</div></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="dot ${d.online ? "green" : "orange"}"></span><button class="btn sm danger" onclick="delDevice('${esc(d.id)}')">Supprimer</button></div></div></div>`).join("")
+    : `<div class="sub">Aucun capteur. Ajoutez-en un pour afficher votre consommation.</div>`;
+}
+async function addDevice() {
+  const r = await api("/api/devices", { name: $("devName").value });
+  if (!r.ok) return toast("Ajout impossible", r.data.error || "", "bad");
+  const url = location.origin.replace("localhost", "127.0.0.1");
+  $("devNew").classList.remove("hide");
+  $("devNew").innerHTML = `<div class="alert critical"><b>Copiez la cle maintenant : elle ne sera plus affichee.</b></div>
+    <div class="meter" style="grid-template-columns:1fr 2fr;margin-top:10px"><div><small>IDENTIFIANT</small>${esc(r.data.device_id)}</div><div style="font-size:13px"><small>CLE SECRETE</small>${esc(r.data.key)}</div></div>
+    <p class="sub" style="margin-top:10px">Avec un circuit Proteus, le pont serie se lance ainsi :</p>
+    <pre class="log" style="height:auto">python tools/serial_bridge.py --port COM6 --url ${esc(url)} --id ${esc(r.data.device_id)} --key ${esc(r.data.key)}</pre>
+    <p class="sub" style="margin-top:6px">Avec une carte ESP32 : renseignez l'adresse du serveur, l'identifiant et la cle dans le firmware (HARDWARE.md).</p>`;
+  $("devName").value = ""; load();
+}
+async function delDevice(id) { if (!confirm("Supprimer ce capteur ? Sa cle ne fonctionnera plus.")) return; await api("/api/devices/delete", { device_id: id }); load(); }
+
+// ---------- Profil ----------
+async function fillProfile() {
+  const o = (await api("/api/options")).data, p = ME.profile;
+  $("pfEmail").textContent = ME.email;
+  $("p_governorate").innerHTML = o.governorates.map((g) => `<option ${g === p.governorate ? "selected" : ""}>${esc(g)}</option>`).join("");
+  $("p_housing_type").innerHTML = o.housing.map((g) => `<option ${g === p.housing_type ? "selected" : ""}>${esc(g)}</option>`).join("");
+  $("p_lang").value = p.lang || window.KW_LANG || "fr"; $("p_full_name").value = p.full_name; $("p_phone").value = p.phone; $("p_delegation").value = p.delegation || ""; $("p_address").value = p.address;
+  $("p_postal_code").value = p.postal_code; $("p_occupants").value = p.occupants; $("p_steg_ref").value = p.steg_ref; $("p_meter_number").value = p.meter_number || ""; $("p_breaker_kw").value = p.breaker_kw;
+  pfLoc = { lat: p.lat, lng: p.lng };
+  if (!pfPin) pfPin = pinMap("pfMap", p.lat, p.lng, (a, b) => (pfLoc = { lat: a, lng: b })); else setTimeout(() => pfPin.map.invalidateSize(), 200);
+}
+$("pf").onsubmit = async (e) => {
+  e.preventDefault(); $("pfMsg").textContent = ""; $("pfSave").disabled = true;
+  const body = { phone: $("p_phone").value, governorate: $("p_governorate").value, delegation: $("p_delegation").value, address: $("p_address").value, postal_code: $("p_postal_code").value,
+    housing_type: $("p_housing_type").value, occupants: $("p_occupants").value, steg_ref: $("p_steg_ref").value, meter_number: $("p_meter_number").value, breaker_kw: $("p_breaker_kw").value, lat: pfLoc.lat, lng: pfLoc.lng, lang: $("p_lang").value };
+  const r = await api("/api/profile", body); $("pfSave").disabled = false;
+  document.querySelectorAll("#pf [data-e]").forEach((x) => (x.textContent = ""));
+  if (r.ok) { $("pfMsg").textContent = "Profil enregistre."; if ($("p_lang").value !== (window.KW_LANG || "fr")) return kwSetLang($("p_lang").value); ME = await requireUser("client"); load(); }
+  else Object.entries(r.data.errors || {}).forEach(([k, m]) => { const el = document.querySelector(`#pf [data-e="${k}"]`); if (el) el.textContent = m; });
+};
+
+(async () => {
+  ME = await requireUser("client"); if (!ME) return;
+  await load(); setInterval(load, 3000);
+})();
+</script>
+</body>
+</html>

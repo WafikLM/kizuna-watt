@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carte des clients — Kizuna Watt</title>
+<script>try{var t=localStorage.getItem("kw-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<link rel="icon" href="/static/logo-icon.png" type="image/png">
+<meta name="theme-color" content="#f3f6fb">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="/"><img class="logo logo-l" src="/static/logo-icon.png" alt="Kizuna Watt"><img class="logo logo-d" src="/static/logo-icon-dark.png" alt=""><span class="bn">Kizuna <b>Watt</b><small>طاقة · 絆 · STEG</small></span></a>
+    <nav class="nav"><a class="on" href="/steg"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Carte des clients</a>
+      <a href="/lighting"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Eclairage public</a></nav>
+    <div class="foot"><div id="who" style="font-weight:650"></div><div class="sub">Compte STEG</div><button class="btn sm" style="margin-top:10px;width:100%" onclick="logout()">Deconnexion</button></div>
+  </aside>
+  <main class="main">
+    <div class="topline"><div><div class="crumb"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>—</span><span>Carte des clients</span></div><h1>Carte des clients</h1></div><span class="grow"></span><span class="pill" id="upd"></span></div>
+    <div class="dash2"><div class="grid g4" id="kpis"></div><div class="glass" id="stateCard"></div></div>
+    <div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:18px;align-items:start">
+      <div>
+        <div class="glass" style="padding:14px"><div id="map" class="map tall"></div>
+          <div class="legend" style="margin-top:10px"><span><i style="background:#30b06a;height:10px;width:10px;border-radius:50%"></i>Capteur en ligne</span><span><i style="background:#f5a524;height:10px;width:10px;border-radius:50%"></i>Capteur hors ligne</span><span><i style="background:#8fa1b8;height:10px;width:10px;border-radius:50%"></i>Pas de capteur</span><span><i style="background:#ef4a4a;height:10px;width:10px;border-radius:50%"></i>Alerte (consommation anormale ou courant eleve)</span></div></div>
+        <div class="glass" id="detail" style="margin-top:18px"><div class="sub">Cliquez sur un client (carte ou liste) pour voir sa fiche.</div></div>
+      </div>
+      <div class="glass">
+        <div class="head"><h2>Clients inscrits</h2><span class="chip" id="count"></span></div>
+        <div class="filters"><input id="q" type="text" placeholder="Rechercher (nom, adresse, reference)"><select id="fg"></select><select id="fs"><option value="">Tous les etats</option><option value="online">Capteur en ligne</option><option value="offline">Capteur hors ligne</option><option value="none">Pas de capteur</option><option value="alert">Alerte</option></select></div>
+        <div class="clist" id="list"></div>
+      </div>
+    </div>
+    <div class="glass" style="margin-top:18px">
+      <div class="head"><h2>Meteo et climat — previsions des modeles IA</h2></div>
+      <div class="sub" style="margin-bottom:10px">Ces donnees sont envoyees par les modeles d'intelligence artificielle de l'equipe. L'application ne calcule ni n'invente aucune prevision.</div>
+      <div class="filters"><select id="cg"></select><select id="cn"><option value="">Toutes les echelles</option><option value="day">Journalier</option><option value="month">Mensuel</option><option value="year">Annuel</option></select></div>
+      <div id="climate"></div>
+    </div>
+    <div class="glass" style="margin-top:18px">
+      <div class="head"><h2>🔔 Annoncer une pointe</h2><span class="chip" id="pkChip"></span></div>
+      <p class="sub" style="margin-top:0">Les foyers <b>participants</b> de la region recoivent la liste de ce qu'ils doivent eteindre ou reporter, avec une heure de relance <b>echelonnee</b> (anti-rebond). Leurs reponses sont <b>declaratives</b> ; les totaux sont masques sous 3 foyers participants.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <label class="sub">Debut<br><input type="datetime-local" id="pkStart" required></label>
+        <label class="sub">Fin<br><input type="datetime-local" id="pkEnd" required></label>
+        <label class="sub">Palier max<br><select id="pkLevel"><option value="1">1 · inutile</option><option value="2">2 · + tolerable</option><option value="3" selected>3 · + decalable</option><option value="4">4 · + confort</option></select></label>
+        <label class="sub">Region<br><select id="pkGov"><option value="">Toutes</option></select></label>
+        <label class="sub">Message (optionnel)<br><input type="text" id="pkNote" maxlength="200" placeholder="ex. canicule"></label>
+        <label class="sub">Recompense par foyer (DT)<br><input type="number" id="pkReward" min="0" max="20" step="0.5" value="0" style="width:110px"></label>
+        <button class="btn primary" id="pkGo" data-validate="#pkStart,#pkEnd,#pkNote,#pkReward">Annoncer</button></div>
+      <div class="sub" id="pkMsg" style="margin-top:8px"></div>
+      <div style="overflow:auto;margin-top:12px"><table id="pkTable"></table></div>
+    </div>
+
+    <div class="glass" style="margin-top:18px">
+      <div class="head"><h2>🎟️ Recompenses : encaisser des codes sur une facture</h2></div>
+      <p class="sub" style="margin-top:0">Un foyer recoit un code <b>seulement si son capteur mesure une baisse d'au moins 15 % pendant la pointe</b>. Cet ecran simule le guichet ou le paiement en ligne : saisissez le montant de la facture et les codes du client. Les codes sont a <b>usage unique</b>, et vous ne voyez jamais la liste des codes, seulement des totaux.</p>
+      <div class="grid g4" id="rwKpis"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:start;margin-top:14px">
+        <label class="sub">Codes (un par ligne)<br><textarea id="rwCodes" required rows="3" style="width:260px" placeholder="0000 0000 0000 0000"></textarea></label>
+        <label class="sub">Montant de la facture (DT)<br><input type="number" id="rwAmount" required min="0" step="0.001" style="width:150px"></label>
+        <label class="sub">Reference facture<br><input type="text" id="rwRef" maxlength="40" style="width:150px"></label>
+        <div style="display:flex;gap:8px;margin-top:20px"><button class="btn" id="rwCheck" data-validate="#rwCodes,#rwAmount,#rwRef">Verifier</button><button class="btn primary" id="rwApply" data-validate="#rwCodes,#rwAmount,#rwRef">Appliquer</button></div></div>
+      <div id="rwOut" style="margin-top:12px"></div>
+    </div>
+
+    <div class="glass" style="margin-top:18px">
+      <div class="head"><h2>🔌 Potentiel d'effacement — foyers participants</h2><span class="chip" id="shedChip"></span></div>
+      <p class="sub" style="margin-top:0">Puissance que les foyers <b>qui ont choisi de participer</b> peuvent liberer pendant une pointe, calculee d'apres leurs <b>equipements declares</b> et la priorite de chacun (le refrigerateur et les equipements vitaux ne comptent jamais). Valeurs <b>declarees</b>, pas des mesures. Une region comptant moins de 3 foyers participants n'affiche aucune valeur.</p>
+      <div class="grid g4" id="shedKpis"></div>
+      <div style="overflow:auto;margin-top:12px"><table id="shedTable"></table></div>
+      <div class="legend" style="margin-top:10px"><span><i style="background:#2f6fe0"></i>1 Inutile</span><span><i style="background:#0e98a5"></i>2 Tolerable</span><span><i style="background:#f08a1c"></i>3 Decalable</span><span><i style="background:#c8102e"></i>4 Confort (module de 50 %)</span></div>
+    </div>
+
+    <div class="glass" style="margin-top:18px">
+      <div class="head"><h2>⚡ Demande d'electricite nationale — prevision mensuelle (modele 3)</h2><span class="chip warn">experimental</span></div>
+      <p class="sub" style="margin-top:0">Le modele prevoit l'energie du mois <i>t</i> a partir de celle de l'annee precedente, de la tendance recente et de l'ecart de temperature (degres-jours de climatisation au-dessus de 31 °C). La temperature du mois prevu vient des <b>previsions climatiques</b> des modeles d'IA (echelle « mois », zone « Tunisie »).</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><input id="enFile" type="file" accept=".csv,text/csv" style="max-width:300px"><button class="btn primary" onclick="importEnergy()">Importer l'historique</button><button class="btn sm danger" onclick="clearEnergy()">Effacer l'historique</button><span class="sub" id="enMsg"></span></div>
+      <p class="sub" style="margin-top:6px">CSV : <code>period</code> (AAAA-MM), <code>energy</code> (ou <code>energy_gwh</code>), et <code>temp_max_c</code> (temperature maximale moyenne du mois, °C). Au moins 27 mois.</p>
+      <div id="demand"></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="glass"><h2>Modeles IA connectes</h2>
+        <div id="models"></div>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><input id="modelName" type="text" required placeholder="Nom du modele (ex. Prevision temperature)" style="max-width:320px"><button class="btn primary" data-validate="#modelName" onclick="addModel()">+ Ajouter un modele</button></div>
+        <div id="modelNew" class="hide" style="margin-top:14px"></div>
+      </div>
+      <div class="glass"><h2>Importer un fichier CSV</h2>
+        <p class="sub" style="margin-top:0">Colonnes : <code>governorate, period, granularity, temp_mean_c</code> (obligatoires), puis <code>temp_min_c, temp_max_c, precip_mm, humidity_pct, confidence, scenario</code>. Voir <code>ml/API_PREVISIONS.md</code>.</p>
+        <input id="csvFile" type="file" accept=".csv,text/csv"><div style="margin-top:10px"><button class="btn primary" onclick="importCsv()">Importer</button></div>
+        <div class="sub" id="csvMsg" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="/static/common.js"></script>
+<script>
+window.KW_PILLS = [
+  { label: "Carte des clients", icon: "map", go: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+  { label: "Pointes", icon: "list", go: () => { const e = $("pkTable"); if (e) e.scrollIntoView({ behavior: "smooth", block: "center" }); } },
+  { label: "Recompenses", icon: "gift", go: () => { const e = $("rwKpis"); if (e) e.scrollIntoView({ behavior: "smooth", block: "center" }); } },
+  { label: "Eclairage public", icon: "bulb", go: () => (location.href = "/lighting") },
+];
+window.KW_BELL = () => { const e = $("list"); if (e) e.scrollIntoView({ behavior: "smooth", block: "center" }); };
+let C = [], NOW = 0, map = null, markers = {}, sel = null, fitted = false;
+const COL = { online: "#1fa56d", offline: "#f2a516", none: "#9aa8c4", alert: "#d92d3a" };
+const LBL = { online: "Capteur en ligne", offline: "Capteur hors ligne", none: "Pas de capteur", alert: "Alerte" };
+
+function state(c) {
+  if (c.online && ((c.abnormal || []).length || (c.current_a || 0) > 0.8 * (c.breaker_kw || 0) * 1000 / 230)) return "alert";
+  return c.online ? "online" : c.devices > 0 ? "offline" : "none";
+}
+function alertText(c) {
+  const t = [];
+  if (c.online && (c.abnormal || []).length) t.push("consommation anormale (habitudes ou equipements declares)");
+  if (c.online && (c.current_a || 0) > 0.8 * (c.breaker_kw || 0) * 1000 / 230) t.push(`courant eleve ${c.current_a.toFixed(1)} A`);
+  return t.join(", ");
+}
+function popup(c) {
+  return `<b>${esc(c.full_name)}</b><br>${esc(c.address)}, ${esc(c.governorate)}<br>${c.power_w != null && c.online ? `<b>${fmt(c.power_w)} W</b> en direct` : LBL[state(c)]}`;
+}
+
+async function load() {
+  const r = await api("/api/steg/clients"); if (!r.ok) return;
+  C = r.data.clients; NOW = r.data.now; render();
+}
+
+function filtered() {
+  const q = $("q").value.trim().toLowerCase(), g = $("fg").value, s = $("fs").value;
+  return C.filter((c) => (!g || c.governorate === g) && (!s || state(c) === s) &&
+    (!q || [c.full_name, c.address, c.steg_ref, c.email, c.delegation].join(" ").toLowerCase().includes(q)));
+}
+
+function render() {
+  const online = C.filter((c) => c.online), alerts = C.filter((c) => state(c) === "alert");
+  const k = (id, s, cls = "") => `<div class="kpi ${cls}"><b id="${id}">0</b><span>${s}</span></div>`;
+  if (!$("k1")) $("kpis").innerHTML = k("k1", "clients inscrits", "hot") + k("k2", "avec un capteur") + k("k3", "capteurs en ligne") + k("k4", "alertes en cours") + k("k5", "puissance mesuree (W, capteurs en ligne)") + k("k6", "facturation prevue de la periode (clients avec capteur)");
+  countUp($("k1"), C.length); countUp($("k2"), C.filter((c) => c.devices > 0).length); countUp($("k3"), online.length); countUp($("k4"), alerts.length); setBell(alerts.length); { const tot = C.reduce((s, c) => s + (c.bill ? c.bill.projected_mil : 0), 0), n = C.filter((c) => c.bill).length; $("k6").textContent = n ? (tot / 1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " DT" : "—"; } { const h = document.querySelector(".topline h1"); if (h) h.textContent = `${C.length} client(s) · ${online.length} capteur(s) en ligne`; }
+  { const cnt = { online: 0, offline: 0, none: 0, alert: 0 }; C.forEach((c) => cnt[state(c)]++);
+    $("stateCard").innerHTML = `<h2>Etat des capteurs de tous les clients</h2>` + donut(Object.keys(cnt).map((k) => ({ label: LBL[k], value: cnt[k], color: COL[k] })), { center: C.length, sub: "clients", fmtv: (v) => v, key: "states" }); }
+  countUp($("k5"), online.reduce((s, c) => s + (c.power_w || 0), 0));
+  $("upd").textContent = "Mis a jour " + new Date().toLocaleTimeString("fr-FR");
+
+  const f = filtered(); $("count").textContent = f.length + " / " + C.length;
+  $("list").innerHTML = f.length ? f.map((c) => { const st = state(c);
+    return `<div class="client" onclick="select(${c.id}, true)"><div class="row1"><b>${esc(c.full_name)}</b><span class="chip" style="color:${COL[st]}">● ${LBL[st]}</span>${c.ai && c.ai.anomaly ? ' <span class="chip bad">Anomalie IA</span>' : ""}</div>
+      <div class="sub">${esc(c.address)}, ${esc(c.governorate)}</div><div class="sub">${c.online ? `<b style="color:var(--strong)">${fmt(c.power_w)} W</b> en direct` : "Ref. " + esc(c.steg_ref)}${alertText(c) ? ` · <span style="color:#ff8a92">${alertText(c)}</span>` : ""}</div></div>`; }).join("")
+    : `<div class="sub">${C.length ? "Aucun client ne correspond au filtre." : "Aucun client inscrit pour l'instant. Ils apparaitront ici des leur inscription."}</div>`;
+
+  if (map) {
+    const ids = new Set(f.map((c) => c.id));
+    Object.keys(markers).forEach((id) => { if (!ids.has(+id)) { map.removeLayer(markers[id]); delete markers[id]; } });
+    f.forEach((c) => {
+      const st = state(c), opts = { radius: sel === c.id ? 12 : 9, color: "#fff", weight: sel === c.id ? 3 : 1.5, fillColor: COL[st], fillOpacity: .95 };
+      if (markers[c.id]) { markers[c.id].setStyle(opts); markers[c.id].setPopupContent(popup(c)); }
+      else { markers[c.id] = L.circleMarker([c.lat, c.lng], opts).addTo(map).bindPopup(popup(c)); markers[c.id].on("click", () => select(c.id, false)); }
+    });
+    if (!fitted && f.length) { fitted = true; const b = L.latLngBounds(f.map((c) => [c.lat, c.lng])); map.fitBounds(b.pad(0.3), { maxZoom: 13 }); }
+  }
+  if (sel) showDetail();
+}
+
+function select(id, fly) {
+  sel = id; const c = C.find((x) => x.id === id); if (!c) return;
+  if (map && fly) { map.flyTo([c.lat, c.lng], Math.max(map.getZoom(), 14)); markers[id] && markers[id].openPopup(); }
+  render();
+}
+
+function showDetail() {
+  const c = C.find((x) => x.id === sel); if (!c) return;
+  const st = state(c), declared = c.equipment.reduce((s, e) => s + e.power_w * e.quantity, 0);
+  $("detail").innerHTML = `<div class="head"><h2>${esc(c.full_name)}</h2><span class="chip" style="color:${COL[st]}">● ${LBL[st]}</span></div>
+    <div class="grid g2"><div class="kv">
+      <span>Adresse</span><span>${esc(c.address)}${c.delegation ? ", " + esc(c.delegation) : ""}, ${esc(c.postal_code)} ${esc(c.governorate)}</span>
+      <span>Telephone</span><span>${esc(c.phone)}</span><span>E-mail</span><span>${esc(c.email)}</span>
+      <span>Reference de facture</span><span>${esc(c.steg_ref)} <span class="sub">(non verifiee)</span></span>
+      <span>N° de compteur</span><span>${esc(c.meter_number || "—")}</span>
+      <span>Puissance souscrite</span><span>${c.breaker_kw} kW</span>
+      <span>Logement</span><span>${esc(c.housing_type)} · ${c.occupants} occupant(s)</span>
+      <span>Inscrit</span><span>${new Date(c.created_at * 1000).toLocaleDateString("fr-FR")}</span></div>
+    <div><h3>Mesure du capteur</h3>${c.devices === 0 ? '<div class="sub">Ce client n\'a pas relie de capteur.</div>' : c.last_seen == null ? '<div class="sub">Capteur enregistre, aucune mesure recue.</div>' :
+      `<div class="kv"><span>Etat</span><span>${c.online ? "En ligne" : "Hors ligne, " + timeAgo(c.last_seen, NOW)}</span><span>Puissance</span><span>${fmt(c.power_w)} W</span>
+       <span>Courant</span><span>${c.current_a.toFixed(2)} A</span><span>Puissance declaree</span><span>${(c.equipment || []).reduce((s, e) => s + e.power_w * e.quantity, 0)} W</span><span>Energie mesuree</span><span>${c.kwh_total.toFixed(2)} kWh</span>${c.bill ? `<span>Facture prevue (periode)</span><span><b>${(c.bill.projected_mil / 1000).toFixed(3).replace(".", ",")} DT</b> <span class="sub">(${(c.bill.low_mil / 1000).toFixed(0)}–${(c.bill.high_mil / 1000).toFixed(0)} DT · ${c.bill.projected_kwh} kWh)</span></span>` : ""}
+       <span>Analyse IA</span><span>${c.ai ? `${c.ai.anomaly ? "<b style='color:#ff8a92'>anomalie</b>" : "normale"} (${esc(c.ai.hour)}, indice ${c.ai.score}/100)` : "pas assez de mesures ou IA indisponible"}</span></div>${alertText(c) ? `<div class="alert critical">${alertText(c)}</div>` : ""}`}
+      <h3 style="margin-top:14px">Equipements declares (${fmt(declared)} W cumules)</h3>
+      ${c.equipment.length ? `<div class="sub">${c.equipment.map((e) => `${esc(e.name)} ×${e.quantity} (${fmt(e.power_w)} W) <span style="color:var(--mut)">· ${esc(e.circuit)} · ${({ protege: "protege", inutile: "inutile", tolerable: "tolerable", decalable: "decalable", confort: "confort" })[e.priority]}</span>`).join("<br>")}</div>` : '<div class="sub">Aucun equipement declare.</div>'}</div></div>`;
+}
+
+// ---------- Meteo et climat (modeles IA) ----------
+async function loadClimate() {
+  const g = $("cg").value, n = $("cn").value;
+  const r = await api(`/api/forecasts?governorate=${encodeURIComponent(g)}` + (n ? "&granularity=" + n : "")); if (!r.ok) return;
+  renderClimate("climate", r.data, "Aucune prevision pour " + g + ". Elle apparaitra des qu'un modele (ou un fichier CSV) aura fourni des resultats pour cette zone.");
+}
+async function loadModels() {
+  const r = await api("/api/steg/models"); if (!r.ok) return;
+  $("models").innerHTML = r.data.models.length ? r.data.models.map((m) => `<div class="client" style="cursor:default"><div class="row1"><div><b>${esc(m.name)}</b> <span class="chip">${esc(m.id)}</span>
+    <div class="sub">${m.last_push ? "Dernier envoi " + new Date(m.last_push * 1000).toLocaleString("fr-FR") : "Aucun envoi"} · ${m.n} ligne(s)${m.version ? " · v" + esc(m.version) : ""}</div></div>
+    <button class="btn sm danger" onclick="delModel('${esc(m.id)}')">Supprimer</button></div></div>`).join("") : `<div class="sub">Aucun modele connecte. Ajoutez-en un pour obtenir une cle d'envoi.</div>`;
+}
+async function addModel() {
+  const r = await api("/api/steg/models", { name: $("modelName").value });
+  if (!r.ok) return toast("Ajout impossible", r.data.error || "", "bad");
+  const url = location.origin.replace("localhost", "127.0.0.1");
+  $("modelNew").classList.remove("hide");
+  $("modelNew").innerHTML = `<div class="alert critical"><b>Copiez la cle maintenant : elle ne sera plus affichee.</b></div>
+    <div class="meter" style="grid-template-columns:1fr 2fr;margin-top:10px"><div><small>IDENTIFIANT</small>${esc(r.data.model_id)}</div><div style="font-size:13px"><small>CLE SECRETE</small>${esc(r.data.key)}</div></div>
+    <p class="sub" style="margin-top:10px">Pour envoyer les resultats du modele depuis un fichier CSV :</p>
+    <pre class="log" style="height:auto">python ml/push_forecasts.py --url ${esc(url)} --model ${esc(r.data.model_id)} --key ${esc(r.data.key)} --csv resultats.csv</pre>`;
+  $("modelName").value = ""; loadModels();
+}
+async function delModel(id) { if (!confirm("Supprimer ce modele et toutes ses previsions ?")) return; await api("/api/steg/models/delete", { model_id: id }); loadModels(); loadClimate(); }
+async function importCsv() {
+  const f = $("csvFile").files[0]; if (!f) { $("csvMsg").textContent = "Choisissez un fichier CSV."; return; }
+  const buf = await f.arrayBuffer(); let text;
+  try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { text = new TextDecoder("windows-1252").decode(buf); }   // CSV Excel
+  const r = await api("/api/steg/forecasts/import", { csv: text });
+  $("csvMsg").innerHTML = r.ok ? `<span style="color:var(--green)">${r.data.imported} ligne(s) importee(s).</span>` : `<span style="color:#ff9aa1">${esc(r.data.error || "Import impossible")}</span>`;
+  if (r.ok) { loadModels(); loadClimate(); }
+}
+
+// ---------- Pointes : annonce, suivi des reponses ----------
+const hm = (ts) => new Date(ts * 1000).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+const toTs = (v) => (v ? Math.floor(new Date(v).getTime() / 1000) : NaN);
+async function loadPeaks() {
+  const r = await api("/api/steg/peaks"); if (!r.ok) return; const d = r.data, kwf = (w) => (w == null ? "—" : w >= 1000 ? (w / 1000).toFixed(1).replace(".", ",") + " kW" : Math.round(w) + " W");
+  $("pkChip").textContent = d.peaks.filter((p) => p.phase === "upcoming" || p.phase === "active").length + " a venir ou en cours";
+  const R = d.rewards || {}, dtf = (m) => ((m || 0) / 1000).toFixed(3).replace(".", ",") + " DT";
+  $("rwKpis").innerHTML = [[R.issued || 0, "codes delivres (" + dtf(R.issued_millimes) + ")"], [R.pending || 0, "disponibles (" + dtf(R.pending_millimes) + ")"], [R.redeemed || 0, "encaisses (" + dtf(R.redeemed_millimes) + ")"], [R.expired || 0, "expires"]].map(([b, s]) => `<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("");
+  const lab = { upcoming: "a venir", active: "en cours", ended: "terminee", cancelled: "annulee" };
+  $("pkTable").innerHTML = "<tr><th>Fenetre</th><th>Region</th><th>Palier</th><th>Etat</th><th>Participants</th><th>Potentiel</th><th>Reponses declarees</th><th>Recompense</th><th></th></tr>" + (d.peaks.map((p) => `<tr><td>${hm(p.start_ts)} → ${hm(p.end_ts).slice(-5)}</td><td>${esc(p.governorate || "Toutes")}</td><td>${p.level}</td><td>${lab[p.phase]}</td><td>${p.participating} / ${p.homes}</td>
+    <td>${p.masked ? '<span class="sub">masque</span>' : kwf(p.potential_w)}</td><td>${p.masked ? "—" : `${p.done} suivie(s) · ${p.declined} refus · ${p.seen} vue(s)`}</td><td>${p.reward_millimes ? (p.reward_millimes / 1000).toFixed(3).replace(".", ",") + " DT" : "—"}</td><td>${p.phase === "upcoming" || p.phase === "active" ? `<button class="btn sm" onclick="cancelPeak(${p.id})">Annuler</button>` : ""}</td></tr>`).join("") || "<tr><td class='sub'>Aucune pointe annoncee.</td></tr>");
+}
+async function redeemCodes(confirm) {
+  const dtf = (m) => ((m || 0) / 1000).toFixed(3).replace(".", ",") + " DT";
+  const r = await api("/api/steg/rewards/redeem", { codes: $("rwCodes").value.split(/\n/).map((s) => s.trim()).filter(Boolean), amount_dt: $("rwAmount").value, bill_ref: $("rwRef").value, confirm });
+  if (!r.ok) { $("rwOut").innerHTML = `<div class="alert critical">${esc((r.data && r.data.error) || "Erreur")}</div>`; return; }
+  const d = r.data, ok = { applied: "#34d399", valid: "#34d399" };
+  $("rwOut").innerHTML = `<table><tr><th>Code</th><th>Resultat</th><th>Reduction</th></tr>${d.lines.map((l) => `<tr><td style="font-family:ui-monospace,monospace">${esc(l.input)}</td><td style="color:${ok[l.status] || "#ff8a8a"}">${esc(l.message)}</td><td>${l.applied_millimes != null ? dtf(l.applied_millimes) : "—"}</td></tr>`).join("")}</table>
+    <div class="notice" style="margin-top:10px">${d.confirmed ? "<b>Encaisse.</b>" : "<b>Simulation</b> (rien n'est consomme)."} Facture ${dtf(d.amount_millimes)} − reduction ${dtf(d.discount_millimes)} = <b>${dtf(d.net_millimes)} a payer</b></div>`;
+  if (confirm) { $("rwCodes").value = ""; loadPeaks(); }
+}
+async function cancelPeak(id) { await api("/api/steg/peaks/cancel", { id }); loadPeaks(); }
+function initPeaks() {
+  api("/api/options").then((o) => { if (o.ok) o.data.governorates.forEach((g) => $("pkGov").insertAdjacentHTML("beforeend", `<option>${esc(g)}</option>`)); });
+  const pad = (n) => String(n).padStart(2, "0"), loc = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const d = new Date(Date.now() + 3600e3); d.setMinutes(0); $("pkStart").value = loc(d); $("pkEnd").value = loc(new Date(d.getTime() + 3 * 3600e3));
+  $("pkGo").onclick = async () => {
+    const r = await api("/api/steg/peaks", { start_ts: toTs($("pkStart").value), end_ts: toTs($("pkEnd").value), level: +$("pkLevel").value, governorate: $("pkGov").value, note: $("pkNote").value, reward_dt: +$("pkReward").value || 0 });
+    $("pkMsg").style.color = r.ok ? "var(--green)" : "var(--red)"; $("pkMsg").textContent = r.ok ? "Pointe annoncee : les foyers participants sont notifies." : (r.data && r.data.error) || "Erreur"; if (r.ok) { $("pkNote").value = ""; loadPeaks(); }
+  };
+  $("rwCheck").onclick = () => redeemCodes(false); $("rwApply").onclick = () => redeemCodes(true);
+  loadPeaks(); setInterval(loadPeaks, 30000);
+}
+
+// ---------- Potentiel d'effacement par region ----------
+async function loadShedding() {
+  const r = await api("/api/steg/shedding"); if (!r.ok) return; const d = r.data, t = d.total, kw = (w) => (w == null ? "—" : w >= 1000 ? (w / 1000).toFixed(1).replace(".", ",") + " kW" : Math.round(w) + " W");
+  $("shedChip").textContent = `${t.participating} foyer(s) participant(s) sur ${t.homes}`;
+  const k = (b, s, c = "") => `<div class="kpi ${c}"><b>${b}</b><span>${s}</span></div>`;
+  $("shedKpis").innerHTML = k(t.homes, "foyers inscrits") + k(t.participating, "foyers participants") + k(t.masked ? "masque" : kw(t.declared_w), "puissance declaree des participants") + k(t.masked ? "masque" : kw(t.potential_w), "potentiel d'effacement (regions affichees)", "hot");
+  const col = { inutile: "#2f6fe0", tolerable: "#0e98a5", decalable: "#f08a1c", confort: "#c8102e" };
+  const max = Math.max(...d.regions.map((g) => g.potential_w || 0), 1);
+  $("shedTable").innerHTML = "<tr><th>Gouvernorat</th><th>Foyers</th><th>Participants</th><th>Potentiel</th><th style='min-width:220px'>Repartition</th></tr>" + d.regions.filter((g) => g.homes).map((g) => `<tr><td>${esc(g.governorate)}</td><td>${g.homes}</td><td>${g.participating}</td>
+    <td>${g.masked ? '<span class="sub">masque (moins de ' + d.min_group + ' foyers)</span>' : g.participating ? "<b>" + kw(g.potential_w) + "</b>" : "—"}</td>
+    <td>${!g.masked && g.potential_w ? `<div class="seg3" style="margin:0;width:${Math.max(8, g.potential_w / max * 100)}%">${["inutile", "tolerable", "decalable", "confort"].map((p) => g.by_priority[p] ? `<i style="width:${g.by_priority[p] / g.potential_w * 100}%;background:${col[p]}" title="${p} : ${Math.round(g.by_priority[p])} W"></i>` : "").join("")}</div>` : ""}</td></tr>`).join("") || "<tr><td class='sub'>Aucun client inscrit.</td></tr>";
+}
+
+// ---------- Demande nationale (modele 3) ----------
+async function loadDemand() {
+  const r = await api("/api/steg/demand"); if (!r.ok) return; const d = r.data, box = $("demand");
+  if (d.status !== "ok") { box.innerHTML = `<div class="alert info" style="margin-top:12px">${esc(d.message || "Indisponible")}</div>`; return; }
+  const hist = d.history, hmap = Object.fromEntries(hist.map((h) => [h.period, h.energy])), fut = d.scenarios[0].points.map((p) => p.period);
+  const periods = [...hist.slice(-36).map((h) => h.period), ...fut];
+  const colors = ["#8fa1b8", "#ffb42e", "#2ee6c5", "#ff5d66", "#c084fc", "#fb923c", "#a3e635", "#f472b6"];
+  const series = [{ color: "#5aa2ff", vals: Object.fromEntries(hist.slice(-36).map((h) => [h.period, h.energy])), w: 3 }].concat(d.scenarios.map((s, i) => ({ color: colors[i % colors.length], dashed: !s.climate, vals: Object.fromEntries(s.points.map((p) => [p.period, p.energy])) })));
+  box.innerHTML = `<div class="legend" style="margin-top:12px"><span><i style="background:#5aa2ff"></i>Historique importe</span>${d.scenarios.map((s, i) => `<span><i style="background:${colors[i % colors.length]}"></i>${esc(s.name)}</span>`).join("")}</div>
+    <svg class="chart" id="demChart" style="height:260px"></svg>
+    <div style="overflow:auto;margin-top:8px"><table><tr><th>Mois</th><th>Annee precedente</th>${d.scenarios.map((s) => `<th>${esc(s.name)}</th>`).join("")}</tr>
+      ${fut.map((p) => { const prev = hmap[(+p.slice(0, 4) - 1) + p.slice(4)]; return `<tr><td>${p}</td><td>${prev != null ? prev.toFixed(1) : "—"}</td>${d.scenarios.map((s) => { const x = s.points.find((q) => q.period === p); return `<td>${x ? `<b>${x.energy.toFixed(1)}</b> <span class="sub">${prev ? (x.energy / prev * 100 - 100 >= 0 ? "+" : "") + (x.energy / prev * 100 - 100).toFixed(1) + " %" : ""}</span>` : "—"}</td>`; }).join("")}</tr>`; }).join("")}</table></div>
+    <p class="sub" style="margin-top:8px">${d.backtest ? `Verification sur ${d.backtest.months} mois connus : erreur moyenne <b style="color:var(--strong)">${d.backtest.mape_pct} %</b>. <b>Optimiste</b> : ces mois ont probablement servi a entrainer le modele.` : "Pas assez de mois avec temperature pour verifier le modele."} Les scenarios « climat » n'apparaissent que si un modele a envoye des previsions mensuelles <code>temp_max_c</code> pour la zone « Tunisie ».</p>
+    <details><summary class="sub" style="cursor:pointer;color:var(--gold)">Hypotheses a confirmer avec l'equipe</summary><ul class="sub">${d.hypotheses.map((h) => `<li>${esc(h)}</li>`).join("")}</ul></details>`;
+  seriesChart("demChart", periods, series);
+}
+async function importEnergy() {
+  const f = $("enFile").files[0]; if (!f) { $("enMsg").textContent = "Choisissez un fichier CSV."; return; }
+  const buf = await f.arrayBuffer(); let text;
+  try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { text = new TextDecoder("windows-1252").decode(buf); }
+  const r = await api("/api/steg/energy/import", { csv: text });
+  $("enMsg").innerHTML = r.ok ? `<span style="color:var(--green)">${r.data.imported} mois importes.</span>` : `<span style="color:#ff9aa1">${esc(r.data.error || "Import impossible")}</span>`;
+  if (r.ok) loadDemand();
+}
+async function clearEnergy() { if (!confirm("Effacer tout l'historique d'energie importe ?")) return; await api("/api/steg/energy/clear", {}); $("enMsg").textContent = "Historique efface."; loadDemand(); }
+
+(async () => {
+  const me = await requireUser("steg"); if (!me) return; loadDemand(); loadShedding(); setInterval(loadShedding, 30000); initPeaks();
+  $("who").textContent = me.profile.full_name;
+  const o = (await api("/api/options")).data;
+  $("fg").innerHTML = '<option value="">Tous les gouvernorats</option>' + o.governorates.map((g) => `<option>${esc(g)}</option>`).join("");
+  if (mapAvailable()) map = newMap("map"); else $("map").innerHTML = '<div class="empty sub">La carte n\'a pas pu se charger (connexion internet requise). La liste des clients reste disponible.</div>';
+  ["q", "fg", "fs"].forEach((id) => ($(id).oninput = $(id).onchange = render));
+  $("cg").innerHTML = '<option value="Tunisie">Tunisie (national)</option>' + o.governorates.map((g) => `<option>${esc(g)}</option>`).join("");
+  $("cg").onchange = $("cn").onchange = loadClimate; loadClimate(); loadModels();
+  await load(); setInterval(load, 5000);
+})();
+</script>
+</body>
+</html>

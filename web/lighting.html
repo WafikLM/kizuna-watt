@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eclairage public — Kizuna Watt</title>
+<script>try{var t=localStorage.getItem("kw-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<link rel="icon" href="/static/logo-icon.png" type="image/png">
+<meta name="theme-color" content="#f3f6fb">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="/"><img class="logo logo-l" src="/static/logo-icon.png" alt="Kizuna Watt"><img class="logo logo-d" src="/static/logo-icon-dark.png" alt=""><span class="bn">Kizuna <b>Watt</b><small>طاقة · 絆 · STEG</small></span></a>
+    <nav class="nav">
+      <a href="/steg"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Carte des clients</a>
+      <a class="on" href="/lighting"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Eclairage public</a>
+    </nav>
+    <div class="foot"><div id="who" style="font-weight:650"></div><div class="sub">Compte STEG</div><button class="btn sm" style="margin-top:10px;width:100%" onclick="logout()">Deconnexion</button></div>
+  </aside>
+  <main class="main">
+    <div class="topline"><h1>Eclairage public automatise</h1><span class="grow"></span><span class="pill" id="clock"></span></div>
+    <div class="grid g4" id="kpis" style="margin-bottom:18px"></div>
+
+    <div class="glass" style="margin-bottom:18px">
+      <div class="head"><h2>☀️ Soleil aujourd'hui — calcul automatique</h2>
+        <select id="sunGov" style="width:auto"></select></div>
+      <div id="sunBox" class="grid g4"></div>
+      <p class="sub" style="margin:10px 0 0">Aucune heure a saisir : le coucher et le lever sont calcules pour la position exacte de chaque luminaire et pour la date du jour. Les controleurs les recoivent dans chaque reponse. Les decalages d'allumage et d'extinction se reglent dans les regles.</p>
+      <details style="margin-top:10px"><summary class="sub" style="cursor:pointer;color:var(--link)">Voir les 24 gouvernorats</summary><div style="max-height:260px;overflow:auto;margin-top:8px"><table id="sunAll"></table></div></details>
+    </div>
+
+    <div id="emptyBox" class="glass empty hide"><div class="ic">💡</div><h2>Aucun luminaire enregistre</h2>
+      <p class="sub" style="max-width:560px;margin:6px auto 0">Rien n'est affiche tant qu'aucun controleur de luminaire n'envoie ses mesures : l'application n'invente aucune donnee.</p>
+      <ol class="steps-list"><li><b>Ajoutez un luminaire</b> (formulaire plus bas) : vous obtenez un identifiant et une cle pour son controleur.</li><li><b>Le controleur envoie</b> niveau, puissance, luminosite et presence, et <b>recoit la consigne</b> a appliquer.</li><li>L'economie d'energie et le gaspillage se calculent a partir de ces mesures reelles.</li></ol></div>
+
+    <div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:18px;align-items:start">
+      <div>
+        <div class="glass" style="padding:14px"><div id="map" class="map tall" style="height:520px"></div>
+          <div class="legend" style="margin-top:10px"><span><i style="background:#fff27a;height:10px;width:10px;border-radius:50%"></i>Plein</span><span><i style="background:#ffb42e;height:10px;width:10px;border-radius:50%"></i>Attenue</span><span><i style="background:#5b6b80;height:10px;width:10px;border-radius:50%"></i>Eteint</span><span><i style="background:#ff5d66;height:10px;width:10px;border-radius:50%"></i>Alerte</span><span><i style="background:#2a3446;height:10px;width:10px;border-radius:50%"></i>Hors ligne / jamais vu</span></div></div>
+        <div class="glass" id="detail" style="margin-top:18px"><div class="sub">Cliquez sur un luminaire (carte ou liste) pour voir son etat, sa consigne et son plan des 24 prochaines heures.</div></div>
+      </div>
+      <div class="glass">
+        <div class="head"><h2>Luminaires</h2><span class="chip" id="count"></span></div>
+        <div class="filters"><input id="q" type="text" placeholder="Rechercher"><select id="fs"><option value="">Tous les etats</option><option value="full">Plein</option><option value="dim">Attenue</option><option value="off">Eteint</option><option value="alert">Alerte</option><option value="offline">Hors ligne</option><option value="never">Jamais vu</option></select></div>
+        <div class="clist" id="list"></div>
+      </div>
+    </div>
+
+    <div class="glass" style="margin-top:18px">
+      <div class="head"><h2>🛣️ Rues principales de Tunisie</h2><span class="chip" id="stTotal"></span></div>
+      <p class="sub" style="margin-top:0">Choisissez une rue pour y declarer des luminaires regulierement espaces, sans placer chaque point a la main. Les positions sont <b>estimees le long du trace</b> : a valider sur le terrain. Donnees © les contributeurs d'OpenStreetMap (ODbL).</p>
+      <div class="filters"><input id="stQ" type="text" placeholder="Nom ou numero de la rue (ex. Bourguiba, GP1, A1)"><select id="stGov"></select>
+        <select id="stKind"><option value="">Tous les types</option><option value="motorway">Autoroutes</option><option value="trunk">Routes nationales</option><option value="primary">Routes principales</option><option value="secondary">Routes secondaires</option></select></div>
+      <div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(300px,1fr);gap:18px;align-items:start">
+        <div class="clist" id="stList" style="max-height:340px"></div>
+        <div id="stForm"><div class="sub">Selectionnez une rue dans la liste : son trace s'affiche sur la carte.</div></div>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="glass"><h2>Regles d'automatisation</h2>
+        <p class="sub" style="margin-top:0">Allumage au coucher du soleil, extinction au lever (calcul astronomique par luminaire). La consigne se module selon l'heure, la luminosite, la presence detectee et la frequentation prevue par les modeles d'IA.</p>
+        <div class="row"><div><label class="f">Decalage allumage (min)</label><input id="p_dusk" type="number" min="-120" max="120"></div><div><label class="f">Decalage extinction (min)</label><input id="p_dawn" type="number" min="-120" max="120"></div></div>
+        <div class="row"><div><label class="f">Extinction si luminosite ≥ (lux)</label><input id="p_lux" type="number" min="1" max="20000"></div><div><label class="f">Niveau plancher (%)</label><input id="p_min" type="number" min="0" max="100"></div></div>
+        <div class="row"><div><label class="f">Niveau si presence detectee (%)</label><input id="p_pres" type="number" min="0" max="100"></div><div><label class="f">Maintien apres presence (min)</label><input id="p_hold" type="number" min="0" max="60"></div></div>
+        <label class="f">Niveau par plage horaire (la nuit)</label><div id="blocks"></div>
+        <button class="btn sm" type="button" onclick="addBlock()" style="margin-top:6px">+ Plage horaire</button>
+        <div class="check"><input type="checkbox" id="p_ai"><label for="p_ai">Moduler avec la frequentation prevue par les modeles d'IA (si disponible)</label></div>
+        <div class="err" id="polMsg" style="color:var(--green)"></div>
+        <button class="btn primary" data-validate="#p_dusk,#p_dawn,#p_lux,#p_min,#p_pres,#p_hold,[data-k]" onclick="savePolicy()" style="margin-top:10px">Enregistrer les regles</button>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="glass"><h2>Ajouter un luminaire</h2>
+          <div class="row"><div><label class="f">Nom</label><input id="l_name" required type="text" placeholder="Rue de la Liberte n°12"></div><div><label class="f">Zone / quartier <small>(facultatif)</small></label><input id="l_zone" type="text" placeholder="Centre-ville"></div></div>
+          <div class="row"><div><label class="f">Gouvernorat</label><select id="l_gov"></select></div><div><label class="f">Delegation <small>(facultatif)</small></label><input id="l_del" type="text"></div></div>
+          <div class="row"><div><label class="f">Puissance nominale (W)</label><input id="l_w" required type="number" min="5" max="1000" value="100"></div><div><label class="f">Type de lampe</label><select id="l_type"></select></div></div>
+          <label class="f">Position <small>(cliquez sur la carte ci-dessous)</small></label><div id="pin" class="map" style="height:240px"></div>
+          <div class="sub" id="pinTxt" style="margin-top:6px">Aucune position choisie.</div>
+          <div class="err" id="lampErr"></div>
+          <button class="btn primary" data-validate="#l_name,#l_zone,#l_del,#l_w" onclick="addLamp()" style="margin-top:10px">+ Ajouter le luminaire</button>
+          <div id="lampNew" class="hide" style="margin-top:14px"></div>
+        </div>
+        <div class="glass"><h2>Frequentation prevue (modeles d'IA)</h2>
+          <div id="preds"></div>
+          <p class="sub" style="margin-top:8px">Les modeles envoient, par heure, un indice de frequentation de 0 a 1 pour un luminaire, une zone ou un gouvernorat. Format et envoi : <code>ml/API_ECLAIRAGE.md</code>. Cle : creez le modele dans la page « Carte des clients ».</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="/static/common.js"></script>
+<script>
+window.KW_PILLS = [
+  { label: "Carte des clients", icon: "map", go: () => (location.href = "/steg") },
+  { label: "Eclairage public", icon: "bulb", go: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+];
+let OV = null, map = null, markers = {}, sel = null, fitted = false, pinMap_ = null, pos = null, blocks = [], polLoaded = false;
+const COL = { full: "#fff27a", dim: "#ffb42e", off: "#5b6b80", alert: "#ff5d66", offline: "#2a3446", never: "#2a3446" };
+const LBL = { full: "Plein", dim: "Attenue", off: "Eteint", alert: "Alerte", offline: "Hors ligne", never: "Jamais vu" };
+const hhmm = (ts) => new Date(ts * 1000).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+async function load() {
+  const r = await api("/api/lighting/overview"); if (!r.ok) return;
+  OV = r.data; render();
+}
+function filtered() { const q = $("q").value.trim().toLowerCase(), s = $("fs").value; return OV.lamps.filter((l) => (!s || l.state === s) && (!q || [l.name, l.zone, l.governorate, l.id].join(" ").toLowerCase().includes(q))); }
+
+function render() {
+  const k = OV.kpi, d = new Date(OV.now * 1000);
+  $("clock").textContent = d.toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  const kp = (id, s, cls = "") => `<div class="kpi ${cls}"><b id="${id}">0</b><span>${s}</span></div>`;
+  if (!$("k1")) $("kpis").innerHTML = kp("k1", "luminaires enregistres", "hot") + kp("k2", "en ligne") + kp("k3", "allumes maintenant") + kp("k4", "energie aujourd'hui (kWh)") + kp("k5", "economie vs plein regime") + kp("k6", "gaspillage detecte (kWh)") + kp("k7", "alertes");
+  countUp($("k1"), k.total); countUp($("k2"), k.online); countUp($("k3"), k.lit); countUp($("k4"), k.kwh, { dec: 2 }); countUp($("k6"), k.waste_kwh, { dec: 2 }); countUp($("k7"), k.alerts);
+  $("k5").textContent = k.saved_pct == null ? "—" : `${k.saved_kwh.toFixed(2)} kWh (${k.saved_pct} %)`;
+  $("emptyBox").classList.toggle("hide", k.total > 0);
+  const f = filtered(); $("count").textContent = f.length + " / " + OV.lamps.length;
+  $("list").innerHTML = f.length ? f.map((l) => `<div class="client" onclick="select('${l.id}', true)"><div class="row1"><b>${esc(l.name)}</b><span class="chip" style="color:${COL[l.state] === "#2a3446" ? "var(--mut)" : COL[l.state]}">● ${LBL[l.state]}</span></div>
+    <div class="sub">${esc(l.governorate)}${l.zone ? " · " + esc(l.zone) : ""} · ${l.rated_w} W</div>
+    <div class="sub">${l.last_seen ? `niveau <b style="color:var(--strong)">${Math.round(l.level)} %</b> · consigne ${l.target} %` : "En attente du premier rapport"}${l.alerts.filter((a) => a.level !== "info").map((a) => ` · <span style="color:#ff8a92">${esc(a.text)}</span>`).join("")}</div></div>`).join("")
+    : `<div class="sub">${OV.lamps.length ? "Aucun luminaire ne correspond." : "Aucun luminaire."}</div>`;
+  if (map) {
+    const ids = new Set(f.map((l) => l.id));
+    Object.keys(markers).forEach((id) => { if (!ids.has(id)) { map.removeLayer(markers[id]); delete markers[id]; } });
+    f.forEach((l) => {
+      const lit = l.state === "full" || l.state === "dim", opts = { radius: sel === l.id ? 11 : 7, color: sel === l.id ? "#fff" : "rgba(255,255,255,.55)", weight: sel === l.id ? 3 : 1.2, fillColor: COL[l.state], fillOpacity: lit ? .95 : .85 };
+      const tip = `<b>${esc(l.name)}</b><br>${LBL[l.state]}${l.last_seen ? " · " + Math.round(l.level) + " %" : ""}`;
+      if (markers[l.id]) { markers[l.id].setStyle(opts); markers[l.id].setPopupContent(tip); }
+      else { markers[l.id] = L.circleMarker([l.lat, l.lng], opts).addTo(map).bindPopup(tip); markers[l.id].on("click", () => select(l.id, false)); }
+    });
+    if (!fitted && f.length) { fitted = true; map.fitBounds(L.latLngBounds(f.map((l) => [l.lat, l.lng])).pad(0.4), { maxZoom: 16 }); }
+  }
+  preds(); if (!polLoaded) loadPolicy(); if (sel) showDetail();
+}
+
+function select(id, fly) { sel = id; const l = OV.lamps.find((x) => x.id === id); if (!l) return; if (map && fly) { map.flyTo([l.lat, l.lng], Math.max(map.getZoom(), 16)); markers[id] && markers[id].openPopup(); } render(); }
+
+async function showDetail() {
+  const r = await api("/api/lighting/lamp?id=" + sel); if (!r.ok) return; const D = r.data, l = D.lamp;
+  const t0 = D.now - 86400, pts = D.series.map((s) => ({ x: Math.max(0, (s.ts - t0) / 86400), y: s.level }));
+  const labels = [0, 6, 12, 18, 24].map((h) => ({ x: h / 24, text: String(new Date((t0 + h * 3600) * 1000).getHours()).padStart(2, "0") + "h" }));
+  $("detail").innerHTML = `<div class="head"><h2>${esc(l.name)} <span class="chip">${esc(l.id)}</span></h2><span class="chip" style="color:${COL[D.state] === "#2a3446" ? "var(--mut)" : COL[D.state]}">● ${LBL[D.state]}</span>
+      <button class="btn sm danger" onclick="delLamp('${esc(l.id)}')">Supprimer</button></div>
+    ${alertsHTML(D.alerts.map((a) => ({ level: a.level === "critical" ? "critical" : a.level === "warn" ? "" : "info", text: a.text })))}
+    <div class="grid g4" style="margin-top:12px">
+      <div class="kpi"><b>${l.last_seen ? Math.round(l.last_level) + " %" : "—"}</b><span>Niveau actuel</span></div>
+      <div class="kpi hot"><b>${D.target} %</b><span>Consigne : ${esc(D.reason)}</span></div>
+      <div class="kpi"><b>${l.last_seen ? Math.round(l.last_power_w) + " W" : "—"}</b><span>Puissance (nominale ${l.rated_w} W)</span></div>
+      <div class="kpi"><b>${l.last_lux == null ? "—" : Math.round(l.last_lux) + " lx"}</b><span>Luminosite mesuree</span></div></div>
+    <div class="sub" style="margin-top:10px">Nuit aujourd'hui : <b style="color:var(--strong)">${D.sunset} → ${D.sunrise}</b> · ${esc(l.lamp_type)} · ${esc(l.governorate)}${l.zone ? " · " + esc(l.zone) : ""} · derniere mesure ${l.last_seen ? new Date(l.last_seen * 1000).toLocaleString("fr-FR") : "jamais"}</div>
+    <h3 style="margin-top:14px">Niveau reel sur 24 h (%)</h3>${pts.length ? '<svg class="chart" id="dChart"></svg>' : '<div class="sub">Pas encore de mesures sur 24 h.</div>'}
+    <h3 style="margin-top:14px">Plan des 24 prochaines heures (regles + soleil + previsions IA)</h3>
+    <div class="bars" style="height:120px">${D.plan.map((p) => `<div title="${esc(p.hour)} : ${p.level} %${p.presence != null ? " · frequentation prevue " + p.presence.toFixed(2) : ""}"><i style="height:${Math.max(2, p.level * 0.9)}px;${p.presence != null ? "background:linear-gradient(180deg,#5aa2ff,#2ee6c5)" : ""}"></i><span>${p.hour.slice(-3)}</span></div>`).join("")}</div>
+    <div class="sub">Barres bleues : niveau module par une prevision d'un modele d'IA. Barres dorees : regles seules.</div>
+    <h3 style="margin-top:14px">Energie par jour (kWh)</h3>
+    ${D.daily.length ? `<table><tr><th>Jour</th><th>Consommee</th><th>Plein regime</th><th>Economie</th><th>Gaspillage</th></tr>${D.daily.map((d) => `<tr><td>${d.day}</td><td>${d.kwh.toFixed(3)}</td><td>${d.baseline_kwh.toFixed(3)}</td><td>${Math.max(0, d.baseline_kwh - d.kwh).toFixed(3)}</td><td>${d.waste_kwh.toFixed(3)}</td></tr>`).join("")}</table>` : '<div class="sub">Pas encore de donnees.</div>'}`;
+  if (pts.length) lineChart("dChart", pts, { color: "#ffb42e", labels, unit: "%" });
+}
+async function delLamp(id) { if (!confirm("Supprimer ce luminaire et son historique ?")) return; await api("/api/lighting/lamps/delete", { lamp_id: id }); sel = null; $("detail").innerHTML = '<div class="sub">Luminaire supprime.</div>'; load(); }
+
+// ---------- predictions IA ----------
+function preds() {
+  const p = OV.predictions;
+  $("preds").innerHTML = p.length ? p.map((m) => `<div class="client" style="cursor:default"><b>${esc(m.name)}</b><div class="sub">${m.n} prevision(s) · du ${esc(m.h0)}h au ${esc(m.h1)}h · recues ${new Date(m.upd * 1000).toLocaleString("fr-FR")}</div></div>`).join("") : '<div class="sub">Aucun modele n\'a encore envoye de prevision. Les regles horaires s\'appliquent seules.</div>';
+}
+
+// ---------- regles ----------
+function loadPolicy() {
+  polLoaded = true; const p = OV.policy;
+  $("p_dusk").value = p.dusk_offset_min; $("p_dawn").value = p.dawn_offset_min; $("p_lux").value = p.lux_cutoff; $("p_min").value = p.min_level;
+  $("p_pres").value = p.presence_level; $("p_hold").value = p.presence_hold_min; $("p_ai").checked = p.use_ai; blocks = p.blocks.map((b) => ({ ...b })); drawBlocks();
+}
+function drawBlocks() {
+  $("blocks").innerHTML = blocks.map((b, i) => `<div class="eq" style="grid-template-columns:1fr 1fr 1fr 40px"><input type="text" value="${b.start}" data-i="${i}" data-k="start" placeholder="HH:MM"><input type="text" value="${b.end}" data-i="${i}" data-k="end" placeholder="HH:MM"><input type="number" min="0" max="100" value="${b.level}" data-i="${i}" data-k="level"><button type="button" class="btn sm danger" data-del="${i}">✕</button></div>`).join("");
+  document.querySelectorAll("#blocks input").forEach((x) => (x.oninput = () => { blocks[+x.dataset.i][x.dataset.k] = x.dataset.k === "level" ? +x.value : x.value; }));
+  document.querySelectorAll("#blocks [data-del]").forEach((x) => (x.onclick = () => { blocks.splice(+x.dataset.del, 1); drawBlocks(); }));
+}
+function addBlock() { blocks.push({ start: "00:00", end: "24:00", level: 100 }); drawBlocks(); }
+async function savePolicy() {
+  const r = await api("/api/lighting/policy", { dusk_offset_min: $("p_dusk").value, dawn_offset_min: $("p_dawn").value, lux_cutoff: $("p_lux").value, min_level: $("p_min").value,
+    presence_level: $("p_pres").value, presence_hold_min: $("p_hold").value, use_ai: $("p_ai").checked, blocks });
+  $("polMsg").style.color = r.ok ? "var(--green)" : "#ff9aa1"; $("polMsg").textContent = r.ok ? "Regles enregistrees : elles s'appliquent a la prochaine consigne." : (r.data.error || "Enregistrement impossible");
+  if (r.ok) { polLoaded = false; load(); }
+}
+
+// ---------- ajout de luminaire ----------
+async function addLamp() {
+  $("lampErr").textContent = "";
+  if (!pos) { $("lampErr").textContent = "Placez le luminaire sur la carte."; return; }
+  const r = await api("/api/lighting/lamps", { name: $("l_name").value, zone: $("l_zone").value, governorate: $("l_gov").value, delegation: $("l_del").value, rated_w: $("l_w").value, lamp_type: $("l_type").value, lat: pos[0], lng: pos[1] });
+  if (!r.ok) { $("lampErr").textContent = r.data.error || "Ajout impossible"; return; }
+  const url = location.origin.replace("localhost", "127.0.0.1");
+  $("lampNew").classList.remove("hide");
+  $("lampNew").innerHTML = `<div class="alert critical"><b>Copiez la cle maintenant : elle ne sera plus affichee.</b></div>
+    <div class="meter" style="grid-template-columns:1fr 2fr;margin-top:10px"><div><small>IDENTIFIANT</small>${esc(r.data.lamp_id)}</div><div style="font-size:13px"><small>CLE DU CONTROLEUR</small>${esc(r.data.key)}</div></div>
+    <p class="sub" style="margin-top:10px">Le controleur envoie son etat et recoit la consigne par <code>POST ${esc(url)}/api/lighting/report</code> (voir <code>ml/API_ECLAIRAGE.md</code>). Pour tester la boucle sans materiel :</p>
+    <pre class="log" style="height:auto">python tools/lamp_controller.py --url ${esc(url)} --id ${esc(r.data.lamp_id)} --key ${esc(r.data.key)} --rated-w ${esc($("l_w").value)} --simulate</pre>`;
+  $("l_name").value = ""; load();
+}
+
+// ---------- soleil (automatique) ----------
+async function loadSun() {
+  const g = $("sunGov").value || "Tunis", r = await api("/api/lighting/sun?gov=" + encodeURIComponent(g)); if (!r.ok) return; const s = r.data, k = (b, t, c = "") => `<div class="kpi ${c}"><b>${b}</b><span>${t}</span></div>`;
+  $("sunBox").innerHTML = k(s.sunset, "Coucher du soleil") + k(s.sunrise, "Lever du soleil") + k(s.lights_on + " → " + s.lights_off, "Allumage → extinction (avec decalages)", "hot") + k(s.is_night ? "🌙 Nuit" : "☀️ Jour", "Il est " + s.local_time + " (heure locale)");
+  const all = await api("/api/lighting/sun");
+  if (all.ok) $("sunAll").innerHTML = "<tr><th>Gouvernorat</th><th>Lever</th><th>Coucher</th><th>Allumage</th><th>Extinction</th></tr>" + all.data.items.map((x) => `<tr><td>${esc(x.governorate)}</td><td>${x.sunrise}</td><td>${x.sunset}</td><td>${x.lights_on}</td><td>${x.lights_off}</td></tr>`).join("");
+}
+
+// ---------- rues principales ----------
+let streetLayer = null, curStreet = null, stTimer = null;
+const KIND_FR = { motorway: "Autoroute", trunk: "Route nationale", primary: "Route principale", secondary: "Route secondaire" };
+async function searchStreets() {
+  const r = await api(`/api/lighting/streets?q=${encodeURIComponent($("stQ").value)}&gov=${encodeURIComponent($("stGov").value)}&kind=${$("stKind").value}`); if (!r.ok) return;
+  $("stTotal").textContent = r.data.total ? r.data.total + " rues" : "aucune rue chargee";
+  $("stList").innerHTML = !r.data.total ? `<div class="sub">Les rues ne sont pas encore chargees. Lancez <code>python tools/fetch_streets.py</code> puis <code>python manage.py import-streets</code>.</div>`
+    : r.data.streets.length ? r.data.streets.map((s) => `<div class="client" onclick="pickStreet('${s.id}')"><div class="row1"><b>${esc(s.name || s.ref)}</b><span class="chip">${esc(s.kind_label)}</span></div>
+      <div class="sub">${s.ref && s.name ? esc(s.ref) + " · " : ""}${esc(s.gov)} · ${(s.length_m / 1000).toFixed(1)} km${s.lamps ? ` · <b style="color:var(--strong)">${s.lamps} luminaires declares</b>` : ""}${s.name_ar ? ` · ${esc(s.name_ar)}` : ""}</div></div>`).join("") : '<div class="sub">Aucune rue ne correspond.</div>';
+}
+async function pickStreet(id) {
+  const r = await api("/api/lighting/street?id=" + id); if (!r.ok) return; const s = curStreet = r.data;
+  if (map) { if (streetLayer) map.removeLayer(streetLayer); streetLayer = L.layerGroup(s.lines.map((l) => L.polyline(l, { color: "#ffb42e", weight: 4, opacity: .9, dashArray: "8 6" }))).addTo(map);
+    map.fitBounds(L.latLngBounds(s.lines.flat()).pad(0.15)); document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "center" }); }
+  $("stForm").innerHTML = `<h3>${esc(s.name || s.ref)} <span class="chip">${esc(s.kind_label)}</span></h3><div class="sub">${esc(s.gov)} · ${(s.length_m / 1000).toFixed(1)} km</div>
+    ${s.lamps ? `<div class="alert">Cette rue a deja ${s.lamps} luminaire(s) declare(s). Supprimez-les d'abord pour recommencer.</div>` : `
+    <div class="row"><div><label class="f">Espacement (m)</label><input id="sp" type="number" min="15" max="150" value="35"></div><div><label class="f">Puissance (W)</label><input id="sw" type="number" min="5" max="1000" value="100"></div></div>
+    <label class="f">Type de lampe</label><select id="stype">${["LED", "Sodium haute pression", "Mercure", "Halogenure metallique", "Fluocompacte"].map((t) => `<option>${t}</option>`).join("")}</select>
+    <div class="sub" id="stEst" style="margin-top:8px"></div><div class="err" id="stErr"></div>
+    <button class="btn primary" style="margin-top:10px" onclick="createAlong()">Declarer les luminaires de cette rue</button>`}
+    <div id="stDone" class="hide" style="margin-top:12px"></div>`;
+  if (!s.lamps) { const est = () => ($("stEst").textContent = `Environ ${Math.max(1, Math.round(s.length_m / (+$("sp").value || 35)))} luminaires.`); $("sp").oninput = est; est(); }
+}
+async function createAlong() {
+  $("stErr").textContent = "";
+  const r = await api("/api/lighting/streets/lamps", { street_id: curStreet.id, spacing_m: $("sp").value, rated_w: $("sw").value, lamp_type: $("stype").value });
+  if (!r.ok) { $("stErr").textContent = r.data.error || "Creation impossible"; return; }
+  const name = (curStreet.name || curStreet.ref || "rue").replace(/[^\w\-]+/g, "_"), blob = new Blob(["﻿" + r.data.csv], { type: "text/csv;charset=utf-8" }), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `luminaires_${name}_cles.csv`; document.body.appendChild(a); a.click(); a.remove();
+  $("stDone").classList.remove("hide");
+  $("stDone").innerHTML = `<div class="alert good"><b>${r.data.created} luminaires declares.</b> Un fichier CSV avec les identifiants et les <b>cles de leurs controleurs</b> vient d'etre telecharge : <b>conservez-le</b>, les cles ne seront plus affichees. Ils apparaissent « Jamais vu » tant qu'un controleur n'a pas envoye de rapport.</div>`;
+  searchStreets(); load();
+}
+
+(async () => {
+  const me = await requireUser("steg"); if (!me) return; $("who").textContent = me.profile.full_name;
+  const o0 = (await api("/api/options")).data;
+  $("sunGov").innerHTML = o0.governorates.map((g) => `<option>${esc(g)}</option>`).join(""); $("sunGov").value = "Tunis"; $("sunGov").onchange = loadSun; loadSun(); setInterval(loadSun, 60000);
+  $("stGov").innerHTML = '<option value="">Tous les gouvernorats</option>' + o0.governorates.map((g) => `<option>${esc(g)}</option>`).join("");
+  ["stQ", "stGov", "stKind"].forEach((id) => ($(id).oninput = $(id).onchange = () => { clearTimeout(stTimer); stTimer = setTimeout(searchStreets, 250); })); searchStreets();
+  const o = (await api("/api/options")).data;
+  $("l_gov").innerHTML = o.governorates.map((g) => `<option>${esc(g)}</option>`).join("");
+  $("l_type").innerHTML = ["LED", "Sodium haute pression", "Mercure", "Halogenure metallique", "Fluocompacte"].map((t) => `<option>${t}</option>`).join("");
+  if (mapAvailable()) {
+    map = newMap("map");
+    pinMap_ = pinMap("pin", null, null, (a, b) => { pos = [a, b]; $("pinTxt").textContent = `Position : ${a}, ${b}`; });
+  } else $("map").innerHTML = '<div class="empty sub">La carte n\'a pas pu se charger (connexion internet requise).</div>';
+  ["q", "fs"].forEach((id) => ($(id).oninput = $(id).onchange = () => OV && render()));
+  await load(); setInterval(load, 5000);
+})();
+</script>
+</body>
+</html>

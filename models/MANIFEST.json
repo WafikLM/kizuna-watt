@@ -1,0 +1,8 @@
+{
+  "files": {
+    "isolation_forest_model.pkl": "f3f5293c77eedf2aba10eb743456a4aa796e9ad0521fd3990af5f4848f798b0d",
+    "model_features.pkl": "9f13c138ad277b833c7ba4ceb35c4ab6966e5d69a38dc54bfbac2c037153b24d",
+    "kizuna_watt_xgb.json": "be9f99edb4d506c47128edfcb62bd33525cc0623ffa2a5122414afe9647d245d",
+    "model3_reel.pkl": "9cd6fa0a3f0077335070d70f45a735c754e49647598cb0694c25c3912e2dedc5"
+  }
+}

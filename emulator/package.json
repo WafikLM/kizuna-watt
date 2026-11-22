@@ -1,0 +1,9 @@
+{
+  "name": "kizuna-carte-virtuelle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Carte capteur virtuelle : execute le .hex de l'Arduino Uno dans un emulateur ATmega328P (avr8js) et envoie les mesures a l'application.",
+  "scripts": { "start": "node board.mjs" },
+  "dependencies": { "avr8js": "^0.21.0" }
+}
