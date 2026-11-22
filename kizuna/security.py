@@ -29,7 +29,7 @@ HEADERS = (
     ("Content-Security-Policy", CSP),
     ("X-Content-Type-Options", "nosniff"),
     ("X-Frame-Options", "DENY"),
-    ("Referrer-Policy", "no-referrer"),
+    ("Referrer-Policy", "strict-origin-when-cross-origin"),      # pas « no-referrer » : le serveur de tuiles OpenStreetMap exige l'en-tete Referer, sinon il repond 403
     ("Permissions-Policy", "geolocation=(self), camera=(), microphone=(), payment=(), usb=()"),
     ("Cross-Origin-Opener-Policy", "same-origin"),
     ("Cross-Origin-Resource-Policy", "same-origin"),

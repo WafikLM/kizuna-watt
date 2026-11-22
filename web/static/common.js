@@ -160,7 +160,7 @@ const TUNISIA = [33.9, 9.5];
 function mapAvailable() { return typeof L !== "undefined"; }
 function newMap(elId, center = TUNISIA, zoom = 6) {
   const m = L.map(elId, { zoomControl: true }).setView(center, zoom);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© les contributeurs d'OpenStreetMap" }).addTo(m);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, referrerPolicy: "origin", attribution: "© les contributeurs d'OpenStreetMap" }).addTo(m);      // OpenStreetMap exige un Referer (politique d'utilisation des tuiles)
   return m;
 }
 // Carte pour poser le pin du domicile. onChange(lat, lng). Retourne {set(lat,lng)}
